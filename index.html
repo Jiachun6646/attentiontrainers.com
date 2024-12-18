@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Click the Color not the Word - Attention Training Game</title>
-    <meta name="description" content="Test and improve your cognitive skills with our unique attention training game. Click the color, not the word, and challenge your brain!">
-    <meta name="keywords" content="attention training, cognitive skills, brain game, color word game, mental agility">
+    <meta name="description" content="Enhance your cognitive skills with our Click the Color not the Word game. A challenging attention training exercise that tests your mental agility and focus.">
+    <meta name="keywords" content="attention training, cognitive skills, brain game, color word game, mental focus">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --text-color: #333;
-            --background-color: #f4f6f7;
+            --primary-color: #3B82F6;
+            --secondary-color: #10B981;
+            --text-color: #1F2937;
+            --background-color: #F9FAFB;
         }
 
         * {
@@ -21,7 +24,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
@@ -31,110 +34,82 @@
             width: 90%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2rem 0;
         }
 
+        /* Header Styles */
         header {
-            background-color: var(--primary-color);
-            color: white;
             text-align: center;
-            padding: 50px 0;
+            background-color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         header h1 {
+            color: var(--primary-color);
             font-size: 2.5rem;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
         }
 
-        .game-intro {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 30px;
-            margin: 50px 0;
-        }
-
-        .game-intro-text {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .game-iframe {
-            flex: 1;
-            min-width: 300px;
-            aspect-ratio: 16/9;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-radius: 10px;
+        /* Game Frame Styles */
+        .game-frame {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            aspect-ratio: 9/16;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
             overflow: hidden;
         }
 
-        .game-iframe iframe {
+        .game-frame iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
 
-        .game-rules, .how-to-play, .benefits {
+        /* Section Styles */
+        .section {
             background-color: white;
-            padding: 50px 0;
-            margin: 30px 0;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .section-title {
-            text-align: center;
-            margin-bottom: 30px;
+        .section h2 {
             color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
         }
 
-        .rules-grid {
+        /* Responsive Typography */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            .section h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Key Features */
+        .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            gap: 1rem;
         }
 
-        .rule-card {
+        .feature {
             background-color: var(--background-color);
-            padding: 20px;
-            border-radius: 10px;
+            padding: 1.5rem;
+            border-radius: 8px;
             text-align: center;
-            transition: transform 0.3s;
         }
 
-        .rule-card:hover {
-            transform: scale(1.05);
-        }
-
-        .cta-section {
-            background-color: var(--secondary-color);
-            color: white;
-            text-align: center;
-            padding: 50px 0;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: white;
+        .feature h3 {
             color: var(--secondary-color);
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .cta-button:hover {
-            background-color: #f1f1f1;
-        }
-
-        @media (max-width: 768px) {
-            .game-intro {
-                flex-direction: column;
-            }
-
-            .game-intro-text, .game-iframe {
-                min-width: 100%;
-            }
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -142,92 +117,68 @@
     <header>
         <div class="container">
             <h1>Click the Color not the Word</h1>
-            <p>A Revolutionary Attention Training Game</p>
+            <p>A Mind-Bending Attention Training Challenge</p>
         </div>
     </header>
 
-    <section class="game-intro container">
-        <div class="game-intro-text">
-            <h2>Challenge Your Brain's Cognitive Flexibility</h2>
-            <p>Introducing a unique game that tests your attention, reaction speed, and mental agility. Can you click the color, not the word?</p>
+    <div class="container">
+        <div class="game-frame">
+            <iframe src="https://attentiontrainers.com/game.html" title="Click the Color not the Word Game"></iframe>
         </div>
-        <div class="game-iframe">
-            <iframe src="https://attentiontrainers.com/game.html" frameborder="0" allowfullscreen></iframe>
-        </div>
-    </section>
 
-    <section class="game-rules container">
-        <h2 class="section-title">Game Rules</h2>
-        <div class="rules-grid">
-            <div class="rule-card">
-                <h3>Objective</h3>
-                <p>Click the color of the word, NOT the word itself</p>
-            </div>
-            <div class="rule-card">
-                <h3>Levels</h3>
-                <p>20 progressively challenging levels</p>
-            </div>
-            <div class="rule-card">
-                <h3>Scoring</h3>
-                <p>5 points per correct level</p>
-            </div>
-            <div class="rule-card">
-                <h3>Time Limit</h3>
-                <p>Decreasing time for each level</p>
-            </div>
-        </div>
-    </section>
+        <section class="section">
+            <h2>Game Overview</h2>
+            <p>Click the Color not the Word is a challenging cognitive training game designed to test and improve your mental focus, reaction time, and attention to detail.</p>
+        </section>
 
-    <section class="how-to-play container">
-        <h2 class="section-title">How to Play</h2>
-        <div class="rules-grid">
-            <div class="rule-card">
-                <h3>Step 1</h3>
-                <p>Look at the randomly generated word</p>
-            </div>
-            <div class="rule-card">
-                <h3>Step 2</h3>
-                <p>Identify the color of the word</p>
-            </div>
-            <div class="rule-card">
-                <h3>Step 3</h3>
-                <p>Click the corresponding color in the grid</p>
-            </div>
-            <div class="rule-card">
-                <h3>Step 4</h3>
-                <p>Be quick! Time is limited</p>
-            </div>
-        </div>
-    </section>
+        <section class="section">
+            <h2>How to Play</h2>
+            <ol>
+                <li>The game presents a colored word that doesn't match its text</li>
+                <li>Your task is to click the color, not read the word</li>
+                <li>You have limited time to make the correct choice</li>
+                <li>Progress through 20 increasingly difficult levels</li>
+            </ol>
+        </section>
 
-    <section class="benefits container">
-        <h2 class="section-title">Cognitive Benefits</h2>
-        <div class="rules-grid">
-            <div class="rule-card">
-                <h3>Improved Focus</h3>
-                <p>Train your brain to concentrate better</p>
+        <section class="section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>Cognitive Challenge</h3>
+                    <p>Tests your brain's ability to override automatic reading response</p>
+                </div>
+                <div class="feature">
+                    <h3>20 Levels</h3>
+                    <p>Progressive difficulty to keep you engaged and challenged</p>
+                </div>
+                <div class="feature">
+                    <h3>Quick Sessions</h3>
+                    <p>Each game takes just a few minutes to play</p>
+                </div>
             </div>
-            <div class="rule-card">
-                <h3>Reaction Speed</h3>
-                <p>Enhance your mental processing time</p>
-            </div>
-            <div class="rule-card">
-                <h3>Cognitive Flexibility</h3>
-                <p>Challenge your brain's ability to switch tasks</p>
-            </div>
-            <div class="rule-card">
-                <h3>Mental Agility</h3>
-                <p>Develop quicker cognitive responses</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to Train Your Attention?</h2>
-            <p>Start playing now and unlock your cognitive potential!</p>
-            <a href="#" class="cta-button">Play Now</a>
-        </div>
-    </section>
+        <section class="section">
+            <h2>Scoring System</h2>
+            <p>The game features a simple yet motivating scoring system:</p>
+            <ul>
+                <li>5 points for each successfully completed level</li>
+                <li>Maximum possible score: 100 points</li>
+                <li>Test your skills and try to beat your previous high score!</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Cognitive Benefits</h2>
+            <p>Regular play of Click the Color not the Word can help:</p>
+            <ul>
+                <li>Improve cognitive flexibility</li>
+                <li>Enhance reaction times</li>
+                <li>Train selective attention</li>
+                <li>Challenge your brain's automatic response patterns</li>
+            </ul>
+        </section>
+    </div>
 </body>
 </html>
