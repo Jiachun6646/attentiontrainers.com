@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click the Color not the Word</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #start-screen, #game-screen, #end-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #start-screen {
+            display: flex;
+        }
+        #progress-bar {
+            width: 100%;
+            height: 3px;
+            background-color: blue;
+        }
+        #keyword {
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.2mm;
+            width: 80%;
+            max-width: 500px;
+        }
+        .grid-item {
+            border: 0.5px solid blue;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+        .start-btn, .retry-btn {
+            background-color: #87CEFA;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        #end-screen-fail, #end-screen-success {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .end-screen-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        #success-text {
+            color: red; 
+            font-size: 48px; 
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 游戏开始界面 -->
+        <div id="start-screen">
+            <h1 style="color: red; font-size: 48px; margin-bottom: 20px;">Click the Color not the Word</h1>
+            <p style="color: black; font-size: 20px; margin-bottom: 20px;">20 levels. Increasing distractions. Against the clock. All you have to do: click the colour and not the word</p>
+            <button class="start-btn" onclick="startGame()">START PLAY</button>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="game-screen">
+            <div id="progress-bar"></div>
+            <div id="keyword" style="font-size: 48px;"></div>
+            <div id="grid"></div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="end-screen">
+            <div id="end-screen-fail">
+                <div class="end-screen-content">
+                    <h2 style="color: red; font-size: 36px;">Sorry, You Failed !</h2>
+                    <p id="final-score" style="color: blue; font-size: 36px;">Your Score is 0</p>
+                    <button class="retry-btn" onclick="resetGame()">Try again</button>
+                </div>
+            </div>
+            <div id="end-screen-success">
+                <div class="end-screen-content">
+                    <div id="success-text">Congratulations. You made it through all the levels !</div>
+                    <button class="retry-btn" onclick="resetGame()">Try again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'Purple', 'Pink', 'Brown', 'Gray'];
+        const colorMap = {
+            'Red': '#FF0000', 
+            'Blue': '#0000FF', 
+            'Green': '#00FF00', 
+            'Yellow': '#FFFF00', 
+            'Black': '#000000', 
+            'Purple': '#800080', 
+            'Pink': '#FFC0CB', 
+            'Brown': '#A52A2A', 
+            'Gray': '#808080'
+        };
+
+        let currentLevel = 1;
+        let score = 0;
+        let gameTimer;
+        let progressBarTimer;
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            currentLevel = 1;
+            score = 0;
+            playLevel();
+        }
+
+        function playLevel() {
+            if (currentLevel > 20) {
+                showSuccessScreen();
+                return;
+            }
+
+            const progressBar = document.getElementById('progress-bar');
+            const keyword = document.getElementById('keyword');
+            const grid = document.getElementById('grid');
+
+            // 清空九宫格
+            grid.innerHTML = '';
+
+            // 随机选择关键词和颜色
+            const wordIndex = Math.floor(Math.random() * colors.length);
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            
+            keyword.textContent = colors[wordIndex];
+            keyword.style.color = colorMap[colors[colorIndex]];
+
+            // 确保颜色和词语不同
+            if (colors[wordIndex] === colors[colorIndex]) {
+                playLevel();
+                return;
+            }
+
+            // 生成九宫格
+            colors.forEach(color => {
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('grid-item');
+                gridItem.textContent = color;
+                gridItem.onclick = () => checkAnswer(color, colors[colorIndex]);
+                grid.appendChild(gridItem);
+            });
+
+            // 重置进度条
+            progressBar.style.width = '100%';
+            const gameDuration = 6 - (currentLevel - 1) * 0.25;
+
+            // 游戏计时器
+            gameTimer = setTimeout(() => {
+                endGame(false);
+            }, gameDuration * 1000);
+
+            // 进度条计时器
+            let timeLeft = gameDuration;
+            progressBarTimer = setInterval(() => {
+                timeLeft -= 0.05;
+                const progressPercentage = (timeLeft / gameDuration) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+            }, 50);
+        }
+
+        function checkAnswer(selectedWord, correctColor) {
+            clearTimeout(gameTimer);
+            clearInterval(progressBarTimer);
+
+            if (selectedWord === correctColor) {
+                currentLevel++;
+                score += 5;
+                playLevel();
+            } else {
+                endGame(false);
+            }
+        }
+
+        function endGame(isSuccess) {
+            clearTimeout(gameTimer);
+            clearInterval(progressBarTimer);
+
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+
+            if (isSuccess) {
+                document.getElementById('end-screen-success').style.display = 'flex';
+                document.getElementById('end-screen-fail').style.display = 'none';
+            } else {
+                document.getElementById('end-screen-fail').style.display = 'flex';
+                document.getElementById('end-screen-success').style.display = 'none';
+                document.getElementById('final-score').textContent = `Your Score is ${score}`;
+            }
+        }
+
+        function showSuccessScreen() {
+            endGame(true);
+        }
+
+        function resetGame() {
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
