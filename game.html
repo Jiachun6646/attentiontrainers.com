@@ -56,7 +56,7 @@
             margin-bottom: 20px;
         }
         
-        .target-input {
+        .time-inputs {
             display: flex;
             justify-content: center;
             gap: 10px;
@@ -66,7 +66,7 @@
         .time-input {
             padding: 8px;
             font-size: 1rem;
-            width: 120px;
+            width: 70px;
             text-align: center;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -173,21 +173,20 @@
         <h1>专注力计时挑战</h1>
         
         <p class="game-description">
-            设置一个目标时间，从0开始计时。尽量在精确的目标时间点停止！越接近目标时间停止，得分越高！时间单位为百分之一秒。
+            设置一个目标时间，然后开始计时。尝试在达到目标时间时点击停止按钮。越接近目标时间停止，得分越高！
         </p>
         
         <div class="difficulty-select">
             <select id="difficultyLevel">
-                <option value="easy">简单模式 (显示计时)</option>
+                <option value="easy">简单模式 (显示计时器)</option>
                 <option value="medium">中等模式 (仅显示进度条)</option>
                 <option value="hard">困难模式 (无视觉提示)</option>
             </select>
         </div>
         
         <div class="controls">
-            <div class="target-input">
-                <input type="number" id="targetTimeInput" class="time-input" min="1" max="3000" value="100" placeholder="目标时间(百分之一秒)">
-                <span>百分之一秒</span>
+            <div class="time-inputs">
+                <input type="number" id="targetSecondsInput" class="time-input" min="1" max="60" value="10" placeholder="秒数">
             </div>
             
             <button id="startButton">开始计时</button>
@@ -195,7 +194,7 @@
             <button id="resetButton">重置</button>
         </div>
         
-        <div id="timerDisplay" class="timer-display">0.00</div>
+        <div id="timerDisplay" class="timer-display">00:00:00</div>
         
         <div class="progress-container">
             <div id="progressBar" class="progress-bar"></div>
@@ -211,7 +210,7 @@
 
     <script>
         // 获取DOM元素
-        const targetTimeInput = document.getElementById('targetTimeInput');
+        const targetSecondsInput = document.getElementById('targetSecondsInput');
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
         const resetButton = document.getElementById('resetButton');
@@ -225,10 +224,11 @@
         
         // 游戏状态变量
         let timer;
-        let targetTime = 0;       // 目标时间（百分之一秒）
-        let currentTime = 0;      // 当前时间（百分之一秒）
+        let targetTime = 0; // 目标时间（秒）
+        let elapsedTime = 0; // 已经过的时间（百分之一秒）
         let isRunning = false;
         let difficulty = 'easy';
+        let updateInterval = 10; // 每10毫秒更新一次（百分之一秒）
         
         // 初始化游戏
         function initialize() {
@@ -257,10 +257,11 @@
         
         // 更新计时器显示
         function updateTimerDisplay() {
-            // 将百分之一秒转换为秒.百分之一秒格式
-            const seconds = Math.floor(currentTime / 100);
-            const centiseconds = currentTime % 100;
-            timerDisplay.textContent = `${seconds}.${padZero(centiseconds)}`;
+            const hundredths = elapsedTime % 100;
+            const seconds = Math.floor(elapsedTime / 100) % 60;
+            const minutes = Math.floor(elapsedTime / 6000);
+            
+            timerDisplay.textContent = `${padZero(minutes)}:${padZero(seconds)}:${padZero(hundredths)}`;
         }
         
         // 为个位数添加前导零
@@ -270,21 +271,21 @@
         
         // 开始计时
         function startTimer() {
-            const targetValue = parseInt(targetTimeInput.value) || 100;
+            const targetSeconds = parseInt(targetSecondsInput.value) || 0;
             
             // 验证输入
-            if (targetValue <= 0) {
+            if (targetSeconds <= 0) {
                 statusMessage.textContent = "请设置有效的目标时间！";
                 return;
             }
             
-            targetTime = targetValue;
-            currentTime = 0;
+            targetTime = targetSeconds * 100; // 转换为百分之一秒
+            elapsedTime = 0;
             
             // 更新UI状态
             startButton.disabled = true;
             stopButton.disabled = false;
-            targetTimeInput.disabled = true;
+            targetSecondsInput.disabled = true;
             difficultySelect.disabled = true;
             scoreDisplay.classList.add('hidden');
             
@@ -295,31 +296,31 @@
             // 根据难度更新UI
             updateUIBasedOnDifficulty();
             
-            // 开始计时 (每10毫秒更新一次，即百分之一秒)
+            // 开始计时
             updateTimerDisplay();
-            updateProgressBar();
             
             timer = setInterval(() => {
-                currentTime++;
+                elapsedTime++;
                 
                 // 更新UI
                 if (difficulty === 'easy') {
                     updateTimerDisplay();
                 }
+                
+                // 更新进度条
                 updateProgressBar();
                 
-                // 如果超过目标时间的2倍，自动停止
-                if (currentTime >= targetTime * 2) {
+                // 如果超过目标时间的两倍，自动停止
+                if (elapsedTime >= targetTime * 2) {
                     stopTimer();
-                    calculateScore(true);
                 }
-            }, 10); // 10毫秒 = 百分之一秒
+            }, updateInterval);
         }
         
         // 更新进度条
         function updateProgressBar() {
-            // 基于目标时间的进度百分比，最大显示到100%
-            const progressPercentage = Math.min((currentTime / targetTime) * 100, 100);
+            // 计算进度百分比，最大为100%
+            const progressPercentage = Math.min((elapsedTime / targetTime) * 100, 100);
             progressBar.style.width = `${progressPercentage}%`;
         }
         
@@ -330,51 +331,52 @@
             clearInterval(timer);
             isRunning = false;
             
+            // 计算得分和提供反馈
+            calculateScore();
+            
             // 更新UI状态
             stopButton.disabled = true;
-            calculateScore();
+            resetButton.disabled = false;
         }
         
         // 计算得分
-        function calculateScore(autoStopped = false) {
-            let score = 0;
+        function calculateScore() {
+            // 计算与目标时间的差距（百分之一秒）
+            const timeDifference = Math.abs(elapsedTime - targetTime);
+            
+            // 计算精确度（基于与目标的接近程度）
+            const accuracy = Math.max(0, 100 - (timeDifference / targetTime) * 100);
+            
+            // 四舍五入到整数
+            const score = Math.round(accuracy);
+            
+            // 根据分数提供反馈
             let feedback = "";
             
-            if (autoStopped) {
-                // 自动停止 - 超时
-                score = 0;
-                feedback = "超过目标时间太多！下次请尝试在目标时间前停止。";
-                statusMessage.textContent = "超时！";
+            if (score >= 95) {
+                feedback = "惊人的专注力！几乎完美的时间感！";
+                document.body.classList.add('success-animation');
+                setTimeout(() => document.body.classList.remove('success-animation'), 1000);
+            } else if (score >= 85) {
+                feedback = "太棒了！你有很好的时间感知能力！";
+                document.body.classList.add('success-animation');
+                setTimeout(() => document.body.classList.remove('success-animation'), 1000);
+            } else if (score >= 70) {
+                feedback = "做得不错！继续练习可以提高你的专注力。";
+            } else if (score >= 50) {
+                feedback = "还不错！多加练习，你会做得更好。";
+            } else {
+                feedback = "需要提高！尝试更专注地感知时间流逝。";
                 document.body.classList.add('failure-animation');
                 setTimeout(() => document.body.classList.remove('failure-animation'), 1000);
-            } else {
-                // 计算与目标时间的接近程度
-                const timeDifference = Math.abs(currentTime - targetTime);
-                const accuracy = Math.max(0, 100 - (timeDifference / targetTime * 100));
-                score = Math.round(accuracy);
-                
-                const actualTime = currentTime / 100; // 转换为秒
-                const targetTimeInSeconds = targetTime / 100; // 转换为秒
-                
-                statusMessage.textContent = `你在 ${actualTime.toFixed(2)} 秒时停止，目标时间是 ${targetTimeInSeconds.toFixed(2)} 秒。`;
-                
-                // 根据分数提供反馈
-                if (score >= 95) {
-                    feedback = "惊人的专注力！几乎完美的时间感！";
-                    document.body.classList.add('success-animation');
-                    setTimeout(() => document.body.classList.remove('success-animation'), 1000);
-                } else if (score >= 85) {
-                    feedback = "太棒了！你有很好的时间感知能力！";
-                    document.body.classList.add('success-animation');
-                    setTimeout(() => document.body.classList.remove('success-animation'), 1000);
-                } else if (score >= 70) {
-                    feedback = "做得不错！继续练习可以提高你的专注力。";
-                } else if (score >= 50) {
-                    feedback = "还不错！多加练习，你会做得更好。";
-                } else {
-                    feedback = "需要提高！尝试更专注地感知时间流逝。";
-                }
             }
+            
+            // 显示详细的时间差异信息
+            const targetTimeFormatted = formatTime(targetTime);
+            const actualTimeFormatted = formatTime(elapsedTime);
+            const differenceFormatted = formatTime(timeDifference);
+            
+            statusMessage.textContent = `目标时间：${targetTimeFormatted}，你的时间：${actualTimeFormatted}，相差：${differenceFormatted}`;
             
             // 显示得分
             scoreElement.textContent = score;
@@ -382,16 +384,23 @@
             scoreDisplay.classList.remove('hidden');
         }
         
+        // 格式化时间显示（转换百分之一秒为可读格式）
+        function formatTime(hundredths) {
+            const seconds = Math.floor(hundredths / 100);
+            const remainder = hundredths % 100;
+            return `${seconds}.${padZero(remainder)}秒`;
+        }
+        
         // 重置游戏
         function resetGame() {
             clearInterval(timer);
             isRunning = false;
-            currentTime = 0;
+            elapsedTime = 0;
             
             // 恢复UI状态
             startButton.disabled = false;
             stopButton.disabled = true;
-            targetTimeInput.disabled = false;
+            targetSecondsInput.disabled = false;
             difficultySelect.disabled = false;
             
             // 重置进度条
