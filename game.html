@@ -3,253 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Click the Color not the Word</title>
+    <title>专注力倒计时挑战</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
+        
         body {
+            background-color: white;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: white;
+            width: 100%;
             overflow: hidden;
         }
-        #game-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #start-screen, #game-screen, #end-screen {
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        
+        .container {
+            width: 90%;
+            max-width: 600px;
             text-align: center;
         }
-        #start-screen {
-            display: flex;
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
-        #progress-bar {
-            width: 100%;
-            height: 3px;
-            background-color: blue;
+        
+        .game-description {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+            line-height: 1.5;
         }
-        #keyword {
-            margin: 20px 0;
+        
+        .timer-display {
+            font-size: 5rem;
             font-weight: bold;
+            color: #333;
+            margin: 20px 0;
         }
-        #grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.2mm;
-            width: 80%;
-            max-width: 500px;
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-        .grid-item {
-            border: 0.5px solid blue;
-            border-radius: 10px;
+        
+        .time-inputs {
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
-            cursor: pointer;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .start-btn, .retry-btn {
-            background-color: #87CEFA;
+        
+        .time-input {
+            padding: 8px;
+            font-size: 1rem;
+            width: 70px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-            font-size: 20px;
-            margin-top: 20px;
+            border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
-        #end-screen-fail, #end-screen-success {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
             height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 1s linear;
         }
-        .end-screen-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
+        
+        .status-message {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            min-height: 1.5em;
         }
-        #success-text {
-            color: red; 
-            font-size: 48px; 
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
+        
+        .hidden {
+            display: none;
+        }
+
+        .difficulty-select {
+            margin-bottom: 15px;
+        }
+        
+        .difficulty-select select {
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .success-animation {
+            animation: successPulse 1s ease-in-out;
+        }
+        
+        .failure-animation {
+            animation: failurePulse 1s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: rgba(76, 175, 80, 0.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes failurePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: rgba(255, 0, 0, 0.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .timer-display {
+                font-size: 3rem;
+            }
+            
+            .game-description {
+                font-size: 0.9rem;
+            }
+            
+            button {
+                padding: 10px 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- 游戏开始界面 -->
-        <div id="start-screen">
-            <h1 style="color: red; font-size: 48px; margin-bottom: 20px;">Click the Color not the Word</h1>
-            <p style="color: black; font-size: 20px; margin-bottom: 20px;">20 levels. Increasing distractions. Against the clock. All you have to do: click the colour and not the word</p>
-            <button class="start-btn" onclick="startGame()">START PLAY</button>
+    <div class="container">
+        <h1>专注力倒计时挑战</h1>
+        
+        <p class="game-description">
+            设置一个倒计时，在时间结束时点击停止按钮。越接近零点的时刻停止，得分越高！
+        </p>
+        
+        <div class="difficulty-select">
+            <select id="difficultyLevel">
+                <option value="easy">简单模式 (显示倒计时)</option>
+                <option value="medium">中等模式 (仅显示进度条)</option>
+                <option value="hard">困难模式 (无视觉提示)</option>
+            </select>
         </div>
-
-        <!-- 游戏界面 -->
-        <div id="game-screen">
-            <div id="progress-bar"></div>
-            <div id="keyword" style="font-size: 48px;"></div>
-            <div id="grid"></div>
+        
+        <div class="controls">
+            <div class="time-inputs">
+                <input type="number" id="minutesInput" class="time-input" min="0" max="59" value="0" placeholder="分钟">
+                <input type="number" id="secondsInput" class="time-input" min="1" max="59" value="30" placeholder="秒钟">
+            </div>
+            
+            <button id="startButton">开始倒计时</button>
+            <button id="stopButton" disabled>停止</button>
+            <button id="resetButton">重置</button>
         </div>
-
-        <!-- 游戏结束界面 -->
-        <div id="end-screen">
-            <div id="end-screen-fail">
-                <div class="end-screen-content">
-                    <h2 style="color: red; font-size: 36px;">Sorry, You Failed !</h2>
-                    <p id="final-score" style="color: blue; font-size: 36px;">Your Score is 0</p>
-                    <button class="retry-btn" onclick="resetGame()">Try again</button>
-                </div>
-            </div>
-            <div id="end-screen-success">
-                <div class="end-screen-content">
-                    <div id="success-text">Congratulations. You made it through all the levels !</div>
-                    <button class="retry-btn" onclick="resetGame()">Try again</button>
-                </div>
-            </div>
+        
+        <div id="timerDisplay" class="timer-display">00:30</div>
+        
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div id="scoreDisplay" class="hidden">
+            <h2>你的得分: <span id="score">0</span>分</h2>
+            <p id="feedback"></p>
         </div>
     </div>
 
     <script>
-        const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'Purple', 'Pink', 'Brown', 'Gray'];
-        const colorMap = {
-            'Red': '#FF0000', 
-            'Blue': '#0000FF', 
-            'Green': '#00FF00', 
-            'Yellow': '#FFFF00', 
-            'Black': '#000000', 
-            'Purple': '#800080', 
-            'Pink': '#FFC0CB', 
-            'Brown': '#A52A2A', 
-            'Gray': '#808080'
-        };
-
-        let currentLevel = 1;
-        let score = 0;
-        let gameTimer;
-        let progressBarTimer;
-
-        function startGame() {
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'flex';
-            currentLevel = 1;
-            score = 0;
-            playLevel();
-        }
-
-        function playLevel() {
-            if (currentLevel > 20) {
-                showSuccessScreen();
-                return;
-            }
-
-            const progressBar = document.getElementById('progress-bar');
-            const keyword = document.getElementById('keyword');
-            const grid = document.getElementById('grid');
-
-            // 清空九宫格
-            grid.innerHTML = '';
-
-            // 随机选择关键词和颜色
-            const wordIndex = Math.floor(Math.random() * colors.length);
-            const colorIndex = Math.floor(Math.random() * colors.length);
-            
-            keyword.textContent = colors[wordIndex];
-            keyword.style.color = colorMap[colors[colorIndex]];
-
-            // 确保颜色和词语不同
-            if (colors[wordIndex] === colors[colorIndex]) {
-                playLevel();
-                return;
-            }
-
-            // 生成九宫格
-            colors.forEach(color => {
-                const gridItem = document.createElement('div');
-                gridItem.classList.add('grid-item');
-                gridItem.textContent = color;
-                gridItem.onclick = () => checkAnswer(color, colors[colorIndex]);
-                grid.appendChild(gridItem);
+        // 获取DOM元素
+        const minutesInput = document.getElementById('minutesInput');
+        const secondsInput = document.getElementById('secondsInput');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const statusMessage = document.getElementById('statusMessage');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreElement = document.getElementById('score');
+        const feedbackElement = document.getElementById('feedback');
+        const difficultySelect = document.getElementById('difficultyLevel');
+        
+        // 游戏状态变量
+        let timer;
+        let totalTime = 0;
+        let timeRemaining = 0;
+        let isRunning = false;
+        let hasEnded = false;
+        let difficulty = 'easy';
+        
+        // 初始化游戏
+        function initialize() {
+            updateTimerDisplay();
+            difficultySelect.addEventListener('change', function() {
+                difficulty = this.value;
+                updateUIBasedOnDifficulty();
             });
-
-            // 重置进度条
-            progressBar.style.width = '100%';
-            const gameDuration = 6 - (currentLevel - 1) * 0.25;
-
-            // 游戏计时器
-            gameTimer = setTimeout(() => {
-                endGame(false);
-            }, gameDuration * 1000);
-
-            // 进度条计时器
-            let timeLeft = gameDuration;
-            progressBarTimer = setInterval(() => {
-                timeLeft -= 0.05;
-                const progressPercentage = (timeLeft / gameDuration) * 100;
-                progressBar.style.width = `${progressPercentage}%`;
-            }, 50);
         }
-
-        function checkAnswer(selectedWord, correctColor) {
-            clearTimeout(gameTimer);
-            clearInterval(progressBarTimer);
-
-            if (selectedWord === correctColor) {
-                currentLevel++;
-                score += 5;
-                playLevel();
-            } else {
-                endGame(false);
+        
+        // 根据难度更新UI
+        function updateUIBasedOnDifficulty() {
+            if (isRunning) {
+                if (difficulty === 'easy') {
+                    timerDisplay.classList.remove('hidden');
+                    document.querySelector('.progress-container').classList.remove('hidden');
+                } else if (difficulty === 'medium') {
+                    timerDisplay.classList.add('hidden');
+                    document.querySelector('.progress-container').classList.remove('hidden');
+                } else if (difficulty === 'hard') {
+                    timerDisplay.classList.add('hidden');
+                    document.querySelector('.progress-container').classList.add('hidden');
+                }
             }
         }
-
-        function endGame(isSuccess) {
-            clearTimeout(gameTimer);
-            clearInterval(progressBarTimer);
-
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('end-screen').style.display = 'flex';
-
-            if (isSuccess) {
-                document.getElementById('end-screen-success').style.display = 'flex';
-                document.getElementById('end-screen-fail').style.display = 'none';
-            } else {
-                document.getElementById('end-screen-fail').style.display = 'flex';
-                document.getElementById('end-screen-success').style.display = 'none';
-                document.getElementById('final-score').textContent = `Your Score is ${score}`;
+        
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = `${padZero(minutes)}:${padZero(seconds)}`;
+        }
+        
+        // 为个位数添加前导零
+        function padZero(num) {
+            return num < 10 ? `0${num}` : num;
+        }
+        
+        // 开始倒计时
+        function startCountdown() {
+            const minutes = parseInt(minutesInput.value) || 0;
+            const seconds = parseInt(secondsInput.value) || 0;
+            
+            // 验证输入
+            if (minutes === 0 && seconds === 0) {
+                statusMessage.textContent = "请设置有效的时间！";
+                return;
             }
+            
+            totalTime = minutes * 60 + seconds;
+            timeRemaining = totalTime;
+            
+            // 更新UI状态
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            minutesInput.disabled = true;
+            secondsInput.disabled = true;
+            difficultySelect.disabled = true;
+            scoreDisplay.classList.add('hidden');
+            
+            // 设置游戏状态
+            isRunning = true;
+            hasEnded = false;
+            statusMessage.textContent = "倒计时开始！";
+            
+            // 根据难度更新UI
+            updateUIBasedOnDifficulty();
+            
+            // 开始计时
+            updateTimerDisplay();
+            updateProgressBar();
+            
+            timer = setInterval(() => {
+                timeRemaining--;
+                
+                // 更新UI
+                if (difficulty === 'easy') {
+                    updateTimerDisplay();
+                }
+                updateProgressBar();
+                
+                // 检查计时器是否结束
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    endGame(true);
+                }
+            }, 1000);
         }
-
-        function showSuccessScreen() {
-            endGame(true);
+        
+        // 更新进度条
+        function updateProgressBar() {
+            const progressPercentage = ((totalTime - timeRemaining) / totalTime) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
         }
-
+        
+        // 停止倒计时
+        function stopCountdown() {
+            if (!isRunning) return;
+            
+            clearInterval(timer);
+            isRunning = false;
+            
+            // 计算得分和提供反馈
+            calculateScore();
+            
+            // 更新UI状态
+            stopButton.disabled = true;
+            resetButton.disabled = false;
+        }
+        
+        // 计算得分
+        function calculateScore() {
+            let score = 0;
+            let feedback = "";
+            
+            if (timeRemaining <= 0) {
+                // 时间已经结束
+                score = 0;
+                feedback = "时间已结束！下次请尝试在时间结束前停止。";
+                statusMessage.textContent = "时间到！";
+                document.body.classList.add('failure-animation');
+                setTimeout(() => document.body.classList.remove('failure-animation'), 1000);
+            } else {
+                // 计算接近零时刻的程度
+                const accuracy = 1 - (timeRemaining / totalTime);
+                score = Math.round(accuracy * 100);
+                
+                // 根据分数提供反馈
+                if (score >= 95) {
+                    feedback = "惊人的专注力！几乎完美的时间感！";
+                    document.body.classList.add('success-animation');
+                    setTimeout(() => document.body.classList.remove('success-animation'), 1000);
+                } else if (score >= 85) {
+                    feedback = "太棒了！你有很好的时间感知能力！";
+                    document.body.classList.add('success-animation');
+                    setTimeout(() => document.body.classList.remove('success-animation'), 1000);
+                } else if (score >= 70) {
+                    feedback = "做得不错！继续练习可以提高你的专注力。";
+                } else if (score >= 50) {
+                    feedback = "还不错！多加练习，你会做得更好。";
+                } else {
+                    feedback = "需要提高！尝试更专注地感知时间流逝。";
+                }
+                
+                statusMessage.textContent = `你在还剩 ${timeRemaining} 秒时停止了倒计时。`;
+            }
+            
+            // 显示得分
+            scoreElement.textContent = score;
+            feedbackElement.textContent = feedback;
+            scoreDisplay.classList.remove('hidden');
+        }
+        
+        // 重置游戏
         function resetGame() {
-            document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('start-screen').style.display = 'flex';
+            clearInterval(timer);
+            isRunning = false;
+            hasEnded = false;
+            
+            // 恢复UI状态
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            minutesInput.disabled = false;
+            secondsInput.disabled = false;
+            difficultySelect.disabled = false;
+            
+            // 重置进度条
+            progressBar.style.width = '0%';
+            
+            // 重置显示
+            timerDisplay.classList.remove('hidden');
+            document.querySelector('.progress-container').classList.remove('hidden');
+            
+            statusMessage.textContent = "";
+            updateTimerDisplay();
         }
+        
+        // 游戏结束的处理
+        function endGame(timeUp) {
+            if (hasEnded) return;
+            
+            hasEnded = true;
+            isRunning = false;
+            
+            startButton.disabled = true;
+            stopButton.disabled = true;
+            
+            if (timeUp) {
+                statusMessage.textContent = "时间到！";
+                scoreElement.textContent = "0";
+                feedbackElement.textContent = "下次请尝试在时间结束前停止。";
+                scoreDisplay.classList.remove('hidden');
+                document.body.classList.add('failure-animation');
+                setTimeout(() => document.body.classList.remove('failure-animation'), 1000);
+            }
+        }
+        
+        // 事件监听器
+        startButton.addEventListener('click', startCountdown);
+        stopButton.addEventListener('click', stopCountdown);
+        resetButton.addEventListener('click', resetGame);
+        
+        // 初始化游戏
+        initialize();
     </script>
 </body>
 </html>
