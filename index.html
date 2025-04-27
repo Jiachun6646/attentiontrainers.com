@@ -2,472 +2,289 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>专注力训练 - 方块消除游戏</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注意力训练师 - 方块消除游戏</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🧠</text></svg>">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #007AFF;
+            --secondary-color: #34C759;
+            --accent-color: #FF3B30;
+            --dark-color: #1c1c1e;
+            --light-color: #f9f9f9;
         }
         
         body {
-            background-color: #f8f8f8;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
         }
         
         header {
-            background-color: #fff;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #5856D6 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
         }
         
         .logo {
-            display: flex;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            text-decoration: none;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
         
-        .logo span {
-            margin-left: 8px;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-        }
-        
-        nav ul li {
-            margin-left: 30px;
-        }
-        
-        nav ul li a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav ul li a:hover {
-            color: #007AFF;
-        }
-        
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 30px;
-            height: 21px;
-            cursor: pointer;
-        }
-        
-        .menu-toggle span {
-            height: 3px;
-            width: 100%;
-            background-color: #333;
-            border-radius: 3px;
-        }
-        
-        .hero {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 120px 20px 60px;
-            text-align: center;
-        }
-        
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .hero h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #555;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: #007AFF;
-            color: #fff;
-            padding: 12px 30px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        
-        .game-section {
-            padding: 60px 0;
-            background-color: #fff;
-        }
-        
-        .container {
-            max-width: 1200px;
+        .tagline {
+            font-size: 1.1rem;
+            font-weight: 300;
+            max-width: 600px;
             margin: 0 auto;
             padding: 0 20px;
         }
         
-        .section-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .section-title h2 {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 15px;
-        }
-        
-        .section-title p {
-            font-size: 18px;
-            color: #666;
-            max-width: 600px;
+        main {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
         
         .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 800px;
             margin: 0 auto;
+            max-width: 800px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        
+        .game-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 600;
         }
         
         .game-frame {
             width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1/1.2;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
+            height: 90vh;
+            max-height: 800px;
             border: none;
         }
         
-        .instructions {
-            background-color: #f8f8f8;
-            padding: 60px 0;
-        }
-        
-        .instructions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .instruction-card {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        
-        .instruction-card .icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .instruction-card h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .instruction-card p {
-            color: #666;
-        }
-        
         .benefits {
-            padding: 60px 0;
-            background-color: #fff;
-        }
-        
-        .benefits-grid {
+            margin-top: 60px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
         }
         
         .benefit-card {
-            padding: 20px;
-            border-radius: 12px;
-            background-color: #f8f8f8;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .benefit-card h3 {
-            font-size: 20px;
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .benefit-icon {
+            font-size: 2.5rem;
             margin-bottom: 15px;
-            color: #333;
+            color: var(--primary-color);
         }
         
-        .benefit-card p {
-            color: #666;
+        .benefit-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .cta-section {
+            margin-top: 60px;
+            text-align: center;
+            padding: 40px;
+            background-color: rgba(0, 122, 255, 0.05);
+            border-radius: 20px;
+        }
+        
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .cta-description {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            font-size: 1.1rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            background-color: #0062cc;
+            transform: translateY(-2px);
         }
         
         footer {
-            background-color: #333;
-            color: #fff;
-            padding: 40px 0;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 40px 20px;
             text-align: center;
-        }
-        
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
+            margin-top: 60px;
         }
         
         .footer-links {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
         
         .footer-links a {
-            color: #fff;
+            color: rgba(255, 255, 255, 0.7);
             margin: 0 15px;
             text-decoration: none;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
         
         .footer-links a:hover {
-            color: #007AFF;
+            color: white;
         }
         
         .copyright {
-            color: #aaa;
-            font-size: 14px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .social-media {
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
         
         @media (max-width: 768px) {
-            header {
-                padding: 10px 0;
+            .logo {
+                font-size: 1.8rem;
             }
             
-            .menu-toggle {
-                display: flex;
+            .tagline {
+                font-size: 1rem;
             }
             
-            nav {
-                position: absolute;
-                top: 60px;
-                left: 0;
-                width: 100%;
-                background-color: #fff;
+            .cta-title {
+                font-size: 1.6rem;
+            }
+            
+            .benefit-card {
                 padding: 20px;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-                display: none;
             }
             
-            nav.active {
-                display: block;
-            }
-            
-            nav ul {
-                flex-direction: column;
-            }
-            
-            nav ul li {
-                margin: 10px 0;
-            }
-            
-            .hero {
-                padding: 100px 20px 50px;
-            }
-            
-            .hero h1 {
-                font-size: 28px;
-            }
-            
-            .hero p {
-                font-size: 16px;
+            .game-frame {
+                height: 80vh;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="header-container">
-            <a href="#" class="logo">
-                🧩 <span>专注力训练</span>
-            </a>
-            <div class="menu-toggle" id="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <nav id="nav">
-                <ul>
-                    <li><a href="#">首页</a></li>
-                    <li><a href="#game">游戏</a></li>
-                    <li><a href="#instructions">玩法说明</a></li>
-                    <li><a href="#benefits">益处</a></li>
-                </ul>
-            </nav>
-        </div>
+        <div class="logo">注意力训练师</div>
+        <p class="tagline">通过有趣的消除方块游戏，提升您的专注力和反应能力</p>
     </header>
     
-    <section class="hero">
-        <div class="hero-content">
-            <h1>提高专注力的方块消除游戏</h1>
-            <p>通过滑动方块，锻炼你的注意力、反应速度和策略思维。这款简单而有趣的游戏将帮助你在轻松的氛围中提升认知能力！</p>
-            <a href="#game" class="btn">立即开始</a>
+    <main>
+        <div class="game-container">
+            <div class="game-title">方块消除挑战</div>
+            <iframe src="game.html" class="game-frame" title="方块消除游戏" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
         </div>
-    </section>
-    
-    <section class="game-section" id="game">
-        <div class="container">
-            <div class="section-title">
-                <h2>开始游戏</h2>
-                <p>滑动方块，将相同颜色的方块滑向对应颜色的边缘来消除它们。每消除一个方块得1分，每次滑动后都会生成新的方块。</p>
+        
+        <div class="benefits">
+            <div class="benefit-card">
+                <div class="benefit-icon">🧠</div>
+                <h3 class="benefit-title">提升专注力</h3>
+                <p>方块消除游戏需要持续的注意力，通过反复练习可以有效提高您的专注能力和持续注意力。</p>
             </div>
-            <div class="game-container">
-                <div class="game-frame">
-                    <iframe src="game.html" title="方块消除游戏" allowfullscreen></iframe>
-                </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon">⚡</div>
+                <h3 class="benefit-title">增强反应速度</h3>
+                <p>快速做出决策并移动方块，可以锻炼您的反应速度和手眼协调能力。</p>
             </div>
-        </div>
-    </section>
-    
-    <section class="instructions" id="instructions">
-        <div class="container">
-            <div class="section-title">
-                <h2>游戏玩法</h2>
-                <p>通过简单的滑动操作，体验这款有趣且具有挑战性的游戏</p>
-            </div>
-            <div class="instructions-grid">
-                <div class="instruction-card">
-                    <div class="icon">🔄</div>
-                    <h3>滑动操作</h3>
-                    <p>向上、下、左、右滑动屏幕，移动所有方块。方块会向滑动方向移动，直到遇到边界或其他方块。</p>
-                </div>
-                <div class="instruction-card">
-                    <div class="icon">🎯</div>
-                    <h3>消除方块</h3>
-                    <p>将方块滑动到与其颜色相同的边缘可以消除方块。红色方块滑到红色边缘，蓝色方块滑到蓝色边缘，依此类推。</p>
-                </div>
-                <div class="instruction-card">
-                    <div class="icon">🔢</div>
-                    <h3>计分规则</h3>
-                    <p>每消除一个方块得1分。每次滑动后，会根据消除的方块数量生成新的方块，游戏会持续到无法再消除方块为止。</p>
-                </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon">🎯</div>
+                <h3 class="benefit-title">训练空间感知</h3>
+                <p>通过规划方块移动路径，提升空间感知能力和战略思考能力。</p>
             </div>
         </div>
-    </section>
-    
-    <section class="benefits" id="benefits">
-        <div class="container">
-            <div class="section-title">
-                <h2>游戏益处</h2>
-                <p>这款游戏不仅有趣，还能帮助提升你的各种认知能力</p>
-            </div>
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <h3>提高专注力</h3>
-                    <p>游戏需要你持续关注方块的颜色和位置，有助于提高专注力和注意力持续时间。</p>
-                </div>
-                <div class="benefit-card">
-                    <h3>锻炼空间思维</h3>
-                    <p>移动方块需要预判方块的运动轨迹和最终位置，有助于提升空间思维能力。</p>
-                </div>
-                <div class="benefit-card">
-                    <h3>培养策略思维</h3>
-                    <p>为了获得高分，你需要制定合理的消除策略，这有助于提升策略思维和规划能力。</p>
-                </div>
-                <div class="benefit-card">
-                    <h3>放松减压</h3>
-                    <p>简单而有趣的游戏体验可以帮助你在短时间内放松心情，缓解日常压力。</p>
-                </div>
-            </div>
+        
+        <div class="cta-section">
+            <h2 class="cta-title">每天训练10分钟，提升认知能力</h2>
+            <p class="cta-description">科学研究表明，定期进行认知训练游戏可以有效提高注意力、记忆力和问题解决能力。</p>
+            <a href="#" class="cta-button">了解更多训练方法</a>
         </div>
-    </section>
+    </main>
     
     <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="#">首页</a>
-                <a href="#game">游戏</a>
-                <a href="#instructions">玩法说明</a>
-                <a href="#benefits">益处</a>
-            </div>
-            <div class="copyright">
-                &copy; 2025 专注力训练 | attentiontrainers.com | 版权所有
-            </div>
+        <div class="footer-links">
+            <a href="#">关于我们</a>
+            <a href="#">隐私政策</a>
+            <a href="#">使用条款</a>
+            <a href="#">联系我们</a>
         </div>
+        
+        <div class="social-media">
+            <a href="#" class="social-icon">微</a>
+            <a href="#" class="social-icon">抖</a>
+            <a href="#" class="social-icon">B</a>
+        </div>
+        
+        <p class="copyright">&copy; 2025 注意力训练师 | attentiontrainers.com | 版权所有</p>
     </footer>
-    
-    <script>
-        // 移动端菜单切换
-        const menuToggle = document.getElementById('menu-toggle');
-        const nav = document.getElementById('nav');
-        
-        menuToggle.addEventListener('click', function() {
-            nav.classList.toggle('active');
-        });
-        
-        // 点击链接后关闭菜单
-        const navLinks = document.querySelectorAll('nav a');
-        
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                nav.classList.remove('active');
-            });
-        });
-        
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                
-                if (targetId === "#") return;
-                
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 60,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
