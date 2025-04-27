@@ -3,70 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>消除方块游戏</title>
+    <title>方块消除游戏</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            touch-action: none; /* 禁止默认触摸行为 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: white;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             width: 100vw;
-            background-color: #ffffff;
             overflow: hidden;
-            position: relative;
+            touch-action: none;
+            position: fixed;
         }
         
         #game-container {
-            position: relative;
-            width: 90vmin;
-            height: 90vmin;
-            max-width: 600px;
-            max-height: 600px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            max-height: 100vh;
+            padding: 10px;
         }
         
         #score-container {
-            position: absolute;
-            top: -60px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        #score-display {
+            width: 100%;
+            padding: 10px;
+            text-align: center;
             font-size: 24px;
             font-weight: bold;
             color: #333;
+            margin-bottom: 10px;
         }
         
-        #game-board {
+        #grid-container {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 1/1;
             position: relative;
             border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            touch-action: none;
         }
         
-        .grid {
+        #grid {
             position: absolute;
             top: 0;
             left: 0;
@@ -75,37 +66,18 @@
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            gap: 1px;
-            background-color: #f0f0f0;
+            gap: 2px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 2px solid rgba(0, 0, 0, 0.1);
         }
-        
-        .cell {
-            background-color: white;
-            position: relative;
-        }
-        
-        .block {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 3px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: all 0.2s ease;
-        }
-        
-        .red { background-color: #FF3B30; }
-        .blue { background-color: #007AFF; }
-        .green { background-color: #34C759; }
-        .purple { background-color: #AF52DE; }
         
         .border-top {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 8px;
-            background-color: #FF3B30;
+            width: 100%;
+            height: 5px;
+            background-color: #FF3B30; /* 红色 */
             z-index: 10;
         }
         
@@ -113,9 +85,9 @@
             position: absolute;
             top: 0;
             right: 0;
-            bottom: 0;
-            width: 8px;
-            background-color: #007AFF;
+            width: 5px;
+            height: 100%;
+            background-color: #007AFF; /* 蓝色 */
             z-index: 10;
         }
         
@@ -123,9 +95,9 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            right: 0;
-            height: 8px;
-            background-color: #34C759;
+            width: 100%;
+            height: 5px;
+            background-color: #4CD964; /* 绿色 */
             z-index: 10;
         }
         
@@ -133,19 +105,72 @@
             position: absolute;
             top: 0;
             left: 0;
-            bottom: 0;
-            width: 8px;
-            background-color: #AF52DE;
+            width: 5px;
+            height: 100%;
+            background-color: #AF52DE; /* 紫色 */
             z-index: 10;
         }
         
-        .fade-out {
-            animation: fadeOut 0.3s forwards;
+        .block {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, opacity 0.2s;
         }
         
-        @keyframes fadeOut {
-            from { transform: scale(1); opacity: 1; }
-            to { transform: scale(0.1); opacity: 0; }
+        .block.red {
+            background-color: #FF3B30;
+        }
+        
+        .block.blue {
+            background-color: #007AFF;
+        }
+        
+        .block.green {
+            background-color: #4CD964;
+        }
+        
+        .block.purple {
+            background-color: #AF52DE;
+        }
+        
+        .empty {
+            background-color: white;
+        }
+        
+        .block.disappearing {
+            transform: scale(0);
+            opacity: 0;
+        }
+        
+        .block.appearing {
+            animation: appear 0.3s ease-out;
+        }
+        
+        @keyframes appear {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        #instructions {
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            max-width: 400px;
+            line-height: 1.5;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
         }
         
         #game-over {
@@ -155,563 +180,491 @@
             width: 100%;
             height: 100%;
             background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
+            display: none;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 20;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
-        
-        #game-over.active {
-            opacity: 1;
-            pointer-events: all;
+            justify-content: center;
+            z-index: 100;
         }
         
         #game-over h2 {
-            font-size: 36px;
+            font-size: 28px;
             margin-bottom: 20px;
             color: #333;
         }
         
-        #game-over p {
-            font-size: 24px;
-            margin-bottom: 30px;
-            color: #555;
-        }
-        
         #restart-button {
-            padding: 12px 30px;
+            padding: 12px 24px;
+            font-size: 16px;
             background-color: #007AFF;
             color: white;
             border: none;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-            transition: all 0.2s;
+            transition: background-color 0.2s;
         }
         
         #restart-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+            background-color: #0056b3;
         }
         
         #restart-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-        }
-        
-        .tutorial {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 30;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .tutorial h2 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .tutorial p {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #555;
-            max-width: 300px;
-        }
-        
-        .tutorial-img {
-            width: 80%;
-            max-width: 300px;
-            margin: 15px 0;
-        }
-        
-        #start-button {
-            padding: 10px 25px;
-            background-color: #007AFF;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-        }
-        
-        .swipe-indicator {
-            display: inline-block;
-            font-size: 24px;
-            margin: 0 5px;
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="score-container">
-            <div id="score-display">分数: 0</div>
-        </div>
-        
-        <div id="game-board">
-            <div class="grid" id="grid"></div>
+        <div id="score-container">分数: <span id="score">0</span></div>
+        <div id="grid-container">
             <div class="border-top"></div>
             <div class="border-right"></div>
             <div class="border-bottom"></div>
             <div class="border-left"></div>
+            <div id="grid"></div>
             
             <div id="game-over">
-                <h2>游戏结束</h2>
+                <h2>游戏结束!</h2>
                 <p>最终得分: <span id="final-score">0</span></p>
                 <button id="restart-button">重新开始</button>
             </div>
-            
-            <div class="tutorial" id="tutorial">
-                <h2>游戏说明</h2>
-                <p>滑动方块，使相同颜色的方块与边缘碰撞可消除</p>
-                <div>
-                    <span class="swipe-indicator">👆</span>
-                    <span class="swipe-indicator">👇</span>
-                    <span class="swipe-indicator">👈</span>
-                    <span class="swipe-indicator">👉</span>
-                </div>
-                <p>红色方块碰到红色边缘消除，蓝色方块碰到蓝色边缘消除，依此类推</p>
-                <button id="start-button">开始游戏</button>
-            </div>
+        </div>
+        <div id="instructions">
+            <p>滑动屏幕移动方块，将相同颜色的方块滑向对应的边缘来消除方块。每消除一个方块得1分，每次滑动后会生成新的方块。</p>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 游戏配置
-            const GRID_SIZE = 8;
-            const COLORS = ['red', 'blue', 'green', 'purple'];
-            const BORDER_COLORS = {
-                'top': 'red',
-                'right': 'blue',
-                'bottom': 'green',
-                'left': 'purple'
+        document.addEventListener('DOMContentLoaded', function() {
+            // 游戏设置
+            const gridSize = 8;
+            const colors = ['red', 'blue', 'green', 'purple'];
+            const borderColors = {
+                top: 'red',
+                right: 'blue',
+                bottom: 'green',
+                left: 'purple'
             };
             
-            // 游戏状态
+            // 游戏变量
+            let grid = [];
             let score = 0;
-            let grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
-            let gameOver = false;
+            let isGameOver = false;
+            let startX, startY, endX, endY;
             
+            // DOM 元素
             const gridElement = document.getElementById('grid');
-            const scoreDisplay = document.getElementById('score-display');
-            const gameOverElement = document.getElementById('game-over');
+            const scoreElement = document.getElementById('score');
             const finalScoreElement = document.getElementById('final-score');
+            const gameOverElement = document.getElementById('game-over');
             const restartButton = document.getElementById('restart-button');
-            const tutorialElement = document.getElementById('tutorial');
-            const startButton = document.getElementById('start-button');
-            
-            // 开始按钮事件
-            startButton.addEventListener('click', () => {
-                tutorialElement.style.display = 'none';
-                initGame();
-            });
             
             // 初始化游戏
             function initGame() {
                 // 重置游戏状态
+                grid = [];
                 score = 0;
-                grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
-                gameOver = false;
-                scoreDisplay.textContent = `分数: ${score}`;
-                gameOverElement.classList.remove('active');
+                isGameOver = false;
                 
-                // 清除网格
+                // 更新分数显示
+                scoreElement.textContent = score;
+                
+                // 隐藏游戏结束界面
+                gameOverElement.style.display = 'none';
+                
+                // 创建空网格
+                for (let row = 0; row < gridSize; row++) {
+                    grid[row] = [];
+                    for (let col = 0; col < gridSize; col++) {
+                        grid[row][col] = null;
+                    }
+                }
+                
+                // 绘制网格
+                renderGrid();
+                
+                // 初始生成一些方块
+                generateBlocks(10);
+            }
+            
+            // 渲染网格
+            function renderGrid() {
                 gridElement.innerHTML = '';
                 
-                // 创建单元格
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < gridSize; row++) {
+                    for (let col = 0; col < gridSize; col++) {
                         const cell = document.createElement('div');
                         cell.className = 'cell';
-                        cell.dataset.row = row;
-                        cell.dataset.col = col;
+                        
+                        if (grid[row][col]) {
+                            const block = document.createElement('div');
+                            block.className = `block ${grid[row][col]}`;
+                            cell.appendChild(block);
+                        } else {
+                            cell.className = 'cell empty';
+                        }
+                        
                         gridElement.appendChild(cell);
                     }
                 }
-                
-                // 初始生成6个方块
-                generateBlocks(6);
             }
             
-            // 生成方块
+            // 随机生成方块
             function generateBlocks(count) {
-                const emptyCells = [];
+                let blocksAdded = 0;
                 
-                // 找出所有空的单元格
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        if (grid[row][col] === null) {
-                            emptyCells.push({ row, col });
+                // 尝试添加指定数量的方块
+                while (blocksAdded < count) {
+                    // 找出所有空位置
+                    const emptyPositions = [];
+                    
+                    for (let row = 0; row < gridSize; row++) {
+                        for (let col = 0; col < gridSize; col++) {
+                            if (grid[row][col] === null) {
+                                emptyPositions.push({ row, col });
+                            }
                         }
                     }
-                }
-                
-                // 如果没有空位置了，游戏结束
-                if (emptyCells.length === 0) {
-                    endGame();
-                    return;
-                }
-                
-                // 打乱空单元格顺序
-                shuffleArray(emptyCells);
-                
-                // 生成方块
-                const blocksToCreate = Math.min(count, emptyCells.length);
-                
-                for (let i = 0; i < blocksToCreate; i++) {
-                    const { row, col } = emptyCells[i];
-                    const colorIndex = Math.floor(Math.random() * COLORS.length);
-                    const color = COLORS[colorIndex];
                     
-                    grid[row][col] = color;
-                    createBlockElement(row, col, color);
+                    // 如果没有空位置，游戏结束
+                    if (emptyPositions.length === 0) {
+                        checkGameOver();
+                        break;
+                    }
+                    
+                    // 随机选择一个空位置
+                    const randomIndex = Math.floor(Math.random() * emptyPositions.length);
+                    const position = emptyPositions[randomIndex];
+                    
+                    // 随机选择一个颜色
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // 在该位置添加一个方块
+                    grid[position.row][position.col] = randomColor;
+                    
+                    blocksAdded++;
                 }
+                
+                // 更新网格显示
+                renderGrid();
+                
+                // 给新方块添加出现动画
+                const blockElements = document.querySelectorAll('.block');
+                blockElements.forEach(block => {
+                    block.classList.add('appearing');
+                    setTimeout(() => {
+                        block.classList.remove('appearing');
+                    }, 300);
+                });
             }
             
-            // 创建方块元素
-            function createBlockElement(row, col, color) {
-                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-                const block = document.createElement('div');
-                block.className = `block ${color}`;
-                block.dataset.row = row;
-                block.dataset.col = col;
-                
-                // 添加出现动画效果
-                block.style.transform = 'scale(0)';
-                cell.appendChild(block);
-                
-                // 触发重排后添加动画
-                setTimeout(() => {
-                    block.style.transform = 'scale(1)';
-                }, 10);
-            }
-            
-            // 滑动处理
+            // 处理滑动
             function handleSwipe(direction) {
-                if (gameOver) return;
+                if (isGameOver) return;
                 
                 let moved = false;
                 let eliminated = 0;
-                const newGrid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
                 
+                // 创建一个深拷贝，用于比较是否有方块移动
+                const gridBefore = JSON.parse(JSON.stringify(grid));
+                
+                // 根据方向移动方块
                 switch (direction) {
                     case 'up':
-                        // 向上滑动 - 按列遍历，从上到下
-                        for (let col = 0; col < GRID_SIZE; col++) {
-                            let newRow = 0;
+                        // 从上到下遍历每一列
+                        for (let col = 0; col < gridSize; col++) {
+                            // 检查列最上方的方块是否与上边界颜色匹配并消除
+                            for (let row = 0; row < gridSize; row++) {
+                                if (grid[row][col] && grid[row][col] === borderColors.top) {
+                                    grid[row][col] = null;
+                                    eliminated++;
+                                    score++;
+                                    break; // 只消除最上方的匹配方块
+                                }
+                            }
                             
-                            // 首先检查第一行是否与顶部边界颜色匹配
-                            for (let row = 0; row < GRID_SIZE; row++) {
-                                if (grid[row][col] !== null) {
-                                    if (row === 0 && grid[row][col] === BORDER_COLORS.top) {
-                                        // 消除方块
-                                        eliminateBlock(row, col);
-                                        eliminated++;
-                                    } else {
-                                        // 移动方块
-                                        if (row !== newRow) {
-                                            moved = true;
-                                            moveBlock(row, col, newRow, col);
-                                        }
-                                        newGrid[newRow][col] = grid[row][col];
-                                        newRow++;
-                                    }
+                            // 移动方块
+                            let nextRow = 0;
+                            for (let row = 0; row < gridSize; row++) {
+                                if (grid[row][col]) {
+                                    const color = grid[row][col];
+                                    grid[row][col] = null;
+                                    grid[nextRow][col] = color;
+                                    nextRow++;
                                 }
                             }
                         }
                         break;
                         
                     case 'right':
-                        // 向右滑动 - 按行遍历，从右到左
-                        for (let row = 0; row < GRID_SIZE; row++) {
-                            let newCol = GRID_SIZE - 1;
+                        // 从右到左遍历每一行
+                        for (let row = 0; row < gridSize; row++) {
+                            // 检查行最右方的方块是否与右边界颜色匹配并消除
+                            for (let col = gridSize - 1; col >= 0; col--) {
+                                if (grid[row][col] && grid[row][col] === borderColors.right) {
+                                    grid[row][col] = null;
+                                    eliminated++;
+                                    score++;
+                                    break; // 只消除最右方的匹配方块
+                                }
+                            }
                             
-                            // 首先检查最右列是否与右边界颜色匹配
-                            for (let col = GRID_SIZE - 1; col >= 0; col--) {
-                                if (grid[row][col] !== null) {
-                                    if (col === GRID_SIZE - 1 && grid[row][col] === BORDER_COLORS.right) {
-                                        // 消除方块
-                                        eliminateBlock(row, col);
-                                        eliminated++;
-                                    } else {
-                                        // 移动方块
-                                        if (col !== newCol) {
-                                            moved = true;
-                                            moveBlock(row, col, row, newCol);
-                                        }
-                                        newGrid[row][newCol] = grid[row][col];
-                                        newCol--;
-                                    }
+                            // 移动方块
+                            let nextCol = gridSize - 1;
+                            for (let col = gridSize - 1; col >= 0; col--) {
+                                if (grid[row][col]) {
+                                    const color = grid[row][col];
+                                    grid[row][col] = null;
+                                    grid[row][nextCol] = color;
+                                    nextCol--;
                                 }
                             }
                         }
                         break;
                         
                     case 'down':
-                        // 向下滑动 - 按列遍历，从下到上
-                        for (let col = 0; col < GRID_SIZE; col++) {
-                            let newRow = GRID_SIZE - 1;
+                        // 从下到上遍历每一列
+                        for (let col = 0; col < gridSize; col++) {
+                            // 检查列最下方的方块是否与下边界颜色匹配并消除
+                            for (let row = gridSize - 1; row >= 0; row--) {
+                                if (grid[row][col] && grid[row][col] === borderColors.bottom) {
+                                    grid[row][col] = null;
+                                    eliminated++;
+                                    score++;
+                                    break; // 只消除最下方的匹配方块
+                                }
+                            }
                             
-                            // 首先检查最后一行是否与底部边界颜色匹配
-                            for (let row = GRID_SIZE - 1; row >= 0; row--) {
-                                if (grid[row][col] !== null) {
-                                    if (row === GRID_SIZE - 1 && grid[row][col] === BORDER_COLORS.bottom) {
-                                        // 消除方块
-                                        eliminateBlock(row, col);
-                                        eliminated++;
-                                    } else {
-                                        // 移动方块
-                                        if (row !== newRow) {
-                                            moved = true;
-                                            moveBlock(row, col, newRow, col);
-                                        }
-                                        newGrid[newRow][col] = grid[row][col];
-                                        newRow--;
-                                    }
+                            // 移动方块
+                            let nextRow = gridSize - 1;
+                            for (let row = gridSize - 1; row >= 0; row--) {
+                                if (grid[row][col]) {
+                                    const color = grid[row][col];
+                                    grid[row][col] = null;
+                                    grid[nextRow][col] = color;
+                                    nextRow--;
                                 }
                             }
                         }
                         break;
                         
                     case 'left':
-                        // 向左滑动 - 按行遍历，从左到右
-                        for (let row = 0; row < GRID_SIZE; row++) {
-                            let newCol = 0;
+                        // 从左到右遍历每一行
+                        for (let row = 0; row < gridSize; row++) {
+                            // 检查行最左方的方块是否与左边界颜色匹配并消除
+                            for (let col = 0; col < gridSize; col++) {
+                                if (grid[row][col] && grid[row][col] === borderColors.left) {
+                                    grid[row][col] = null;
+                                    eliminated++;
+                                    score++;
+                                    break; // 只消除最左方的匹配方块
+                                }
+                            }
                             
-                            // 首先检查第一列是否与左边界颜色匹配
-                            for (let col = 0; col < GRID_SIZE; col++) {
-                                if (grid[row][col] !== null) {
-                                    if (col === 0 && grid[row][col] === BORDER_COLORS.left) {
-                                        // 消除方块
-                                        eliminateBlock(row, col);
-                                        eliminated++;
-                                    } else {
-                                        // 移动方块
-                                        if (col !== newCol) {
-                                            moved = true;
-                                            moveBlock(row, col, row, newCol);
-                                        }
-                                        newGrid[row][newCol] = grid[row][col];
-                                        newCol++;
-                                    }
+                            // 移动方块
+                            let nextCol = 0;
+                            for (let col = 0; col < gridSize; col++) {
+                                if (grid[row][col]) {
+                                    const color = grid[row][col];
+                                    grid[row][col] = null;
+                                    grid[row][nextCol] = color;
+                                    nextCol++;
                                 }
                             }
                         }
                         break;
                 }
                 
-                // 更新网格状态
-                grid = newGrid;
+                // 检查是否有方块移动
+                for (let row = 0; row < gridSize; row++) {
+                    for (let col = 0; col < gridSize; col++) {
+                        if (grid[row][col] !== gridBefore[row][col]) {
+                            moved = true;
+                            break;
+                        }
+                    }
+                    if (moved) break;
+                }
                 
-                // 如果有方块被消除或移动了，则生成新方块
+                // 更新分数
+                scoreElement.textContent = score;
+                
+                // 如果有方块被消除或移动，生成新方块
                 if (eliminated > 0 || moved) {
-                    // 更新分数
-                    score += eliminated;
-                    scoreDisplay.textContent = `分数: ${score}`;
-                    
-                    // 延迟一点再生成新方块，让动画有时间播放
-                    setTimeout(() => {
-                        generateBlocks(eliminated + 1);
-                        
-                        // 检查是否还能移动
-                        if (!canMove()) {
-                            endGame();
-                        }
-                    }, 300);
+                    const newBlocksCount = eliminated > 0 ? eliminated + 1 : 1;
+                    generateBlocks(newBlocksCount);
+                } else {
+                    checkGameOver();
                 }
             }
             
-            // 移动方块
-            function moveBlock(fromRow, fromCol, toRow, toCol) {
-                const block = document.querySelector(`.block[data-row="${fromRow}"][data-col="${fromCol}"]`);
-                if (!block) return;
+            // 检查游戏是否结束
+            function checkGameOver() {
+                // 检查是否还能移动
+                let canMove = false;
                 
-                // 更新数据属性
-                block.dataset.row = toRow;
-                block.dataset.col = toCol;
-                
-                // 获取目标单元格
-                const targetCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
-                
-                // 移动方块到新单元格
-                targetCell.appendChild(block);
-            }
-            
-            // 消除方块
-            function eliminateBlock(row, col) {
-                const block = document.querySelector(`.block[data-row="${row}"][data-col="${col}"]`);
-                if (!block) return;
-                
-                // 添加消失动画
-                block.classList.add('fade-out');
-                
-                // 动画完成后移除方块
-                setTimeout(() => {
-                    if (block.parentNode) {
-                        block.parentNode.removeChild(block);
-                    }
-                }, 300);
-            }
-            
-            // 检查是否还能移动
-            function canMove() {
-                // 检查是否还有空位
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                // 检查是否还有空位置
+                let hasEmpty = false;
+                for (let row = 0; row < gridSize; row++) {
+                    for (let col = 0; col < gridSize; col++) {
                         if (grid[row][col] === null) {
-                            return true;
+                            hasEmpty = true;
+                            break;
+                        }
+                    }
+                    if (hasEmpty) break;
+                }
+                
+                if (hasEmpty) {
+                    canMove = true;
+                } else {
+                    // 检查水平相邻是否有可消除的
+                    for (let row = 0; row < gridSize; row++) {
+                        // 检查左边界
+                        if (grid[row][0] === borderColors.left) {
+                            canMove = true;
+                            break;
+                        }
+                        // 检查右边界
+                        if (grid[row][gridSize - 1] === borderColors.right) {
+                            canMove = true;
+                            break;
+                        }
+                    }
+                    
+                    // 检查垂直相邻是否有可消除的
+                    for (let col = 0; col < gridSize; col++) {
+                        // 检查上边界
+                        if (grid[0][col] === borderColors.top) {
+                            canMove = true;
+                            break;
+                        }
+                        // 检查下边界
+                        if (grid[gridSize - 1][col] === borderColors.bottom) {
+                            canMove = true;
+                            break;
                         }
                     }
                 }
                 
-                // 检查是否有可以消除的方块
-                // 检查顶部边界
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    if (grid[0][col] === BORDER_COLORS.top) {
-                        return true;
-                    }
+                // 如果不能再移动，游戏结束
+                if (!canMove) {
+                    isGameOver = true;
+                    finalScoreElement.textContent = score;
+                    gameOverElement.style.display = 'flex';
                 }
-                
-                // 检查右侧边界
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    if (grid[row][GRID_SIZE - 1] === BORDER_COLORS.right) {
-                        return true;
-                    }
-                }
-                
-                // 检查底部边界
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    if (grid[GRID_SIZE - 1][col] === BORDER_COLORS.bottom) {
-                        return true;
-                    }
-                }
-                
-                // 检查左侧边界
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    if (grid[row][0] === BORDER_COLORS.left) {
-                        return true;
-                    }
-                }
-                
-                return false;
-            }
-            
-            // 结束游戏
-            function endGame() {
-                gameOver = true;
-                finalScoreElement.textContent = score;
-                gameOverElement.classList.add('active');
-            }
-            
-            // 辅助函数 - 打乱数组
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
             }
             
             // 触摸事件处理
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let gameBoard = document.getElementById('game-board');
-            
-            // 阻止默认滚动行为
-            gameBoard.addEventListener('touchstart', (e) => {
+            gridElement.addEventListener('touchstart', function(e) {
                 e.preventDefault();
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
             }, { passive: false });
             
-            gameBoard.addEventListener('touchmove', (e) => {
-                e.preventDefault(); // 防止页面滚动
+            gridElement.addEventListener('touchmove', function(e) {
+                e.preventDefault();
             }, { passive: false });
             
-            gameBoard.addEventListener('touchend', (e) => {
+            gridElement.addEventListener('touchend', function(e) {
                 e.preventDefault();
-                if (gameOver) return;
+                endX = e.changedTouches[0].clientX;
+                endY = e.changedTouches[0].clientY;
                 
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = endX - startX;
+                const diffY = endY - startY;
                 
-                const deltaX = touchEndX - touchStartX;
-                const deltaY = touchEndY - touchStartY;
-                
-                // 确定滑动方向 (需要有足够的距离才触发)
-                const minSwipeDistance = 30;
-                
-                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // 确定滑动方向
+                if (Math.abs(diffX) > Math.abs(diffY)) {
                     // 水平滑动
-                    if (Math.abs(deltaX) > minSwipeDistance) {
-                        if (deltaX > 0) {
-                            handleSwipe('right');
-                        } else {
-                            handleSwipe('left');
-                        }
+                    if (diffX > 30) {
+                        handleSwipe('right');
+                    } else if (diffX < -30) {
+                        handleSwipe('left');
                     }
                 } else {
                     // 垂直滑动
-                    if (Math.abs(deltaY) > minSwipeDistance) {
-                        if (deltaY > 0) {
-                            handleSwipe('down');
-                        } else {
-                            handleSwipe('up');
-                        }
+                    if (diffY > 30) {
+                        handleSwipe('down');
+                    } else if (diffY < -30) {
+                        handleSwipe('up');
                     }
                 }
             }, { passive: false });
             
-            // 键盘控制
-            document.addEventListener('keydown', (e) => {
-                if (gameOver) return;
+            // 鼠标事件处理（适用于桌面设备）
+            let isMouseDown = false;
+            
+            gridElement.addEventListener('mousedown', function(e) {
+                isMouseDown = true;
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isMouseDown) return;
+            });
+            
+            document.addEventListener('mouseup', function(e) {
+                if (!isMouseDown) return;
+                
+                isMouseDown = false;
+                endX = e.clientX;
+                endY = e.clientY;
+                
+                const diffX = endX - startX;
+                const diffY = endY - startY;
+                
+                // 确定滑动方向
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    // 水平滑动
+                    if (diffX > 30) {
+                        handleSwipe('right');
+                    } else if (diffX < -30) {
+                        handleSwipe('left');
+                    }
+                } else {
+                    // 垂直滑动
+                    if (diffY > 30) {
+                        handleSwipe('down');
+                    } else if (diffY < -30) {
+                        handleSwipe('up');
+                    }
+                }
+            });
+            
+            // 键盘事件处理
+            document.addEventListener('keydown', function(e) {
+                if (isGameOver) return;
                 
                 switch (e.key) {
                     case 'ArrowUp':
                         handleSwipe('up');
-                        e.preventDefault();
                         break;
                     case 'ArrowRight':
                         handleSwipe('right');
-                        e.preventDefault();
                         break;
                     case 'ArrowDown':
                         handleSwipe('down');
-                        e.preventDefault();
                         break;
                     case 'ArrowLeft':
                         handleSwipe('left');
-                        e.preventDefault();
                         break;
                 }
             });
             
-            // 重新开始游戏
-            restartButton.addEventListener('click', initGame);
+            // 重新开始按钮点击事件
+            restartButton.addEventListener('click', function() {
+                initGame();
+            });
             
-            // 阻止整个文档的默认触摸行为
-            document.addEventListener('touchmove', (e) => {
+            // 防止iOS上下滑动导致整个页面滑动
+            document.body.addEventListener('touchmove', function(e) {
                 e.preventDefault();
             }, { passive: false });
+            
+            // 启动游戏
+            initGame();
         });
     </script>
 </body>
