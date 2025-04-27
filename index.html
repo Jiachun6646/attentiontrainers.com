@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Attention Trainers - 专注力训练游戏</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <style>
@@ -17,7 +17,7 @@
             --text-color: #333333;
             --light-bg: #f8f9fa;
             --header-height: 60px;
-            --footer-height: 80px;
+            --footer-height: 60px;
         }
         
         body {
@@ -28,6 +28,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         header {
@@ -59,26 +60,6 @@
             margin-right: 8px;
         }
         
-        nav ul {
-            display: flex;
-            list-style: none;
-        }
-        
-        nav ul li {
-            margin-left: 30px;
-        }
-        
-        nav ul li a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav ul li a:hover {
-            color: var(--primary-color);
-        }
-        
         .main-content {
             flex: 1;
             margin-top: var(--header-height);
@@ -89,20 +70,20 @@
         
         .hero-section {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-            padding: 60px 5%;
+            padding: 30px 5%;
             text-align: center;
         }
         
         .hero-section h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 2rem;
+            margin-bottom: 15px;
             color: #222;
         }
         
         .hero-section p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             max-width: 800px;
-            margin: 0 auto 30px;
+            margin: 0 auto 20px;
             color: #555;
         }
         
@@ -110,7 +91,7 @@
             display: inline-block;
             background-color: var(--primary-color);
             color: white;
-            padding: 12px 30px;
+            padding: 10px 25px;
             border-radius: 30px;
             text-decoration: none;
             font-weight: bold;
@@ -125,7 +106,7 @@
         
         .game-section {
             flex: 1;
-            padding: 40px 5%;
+            padding: 20px 5%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -150,8 +131,8 @@
         
         .game-instructions {
             max-width: 800px;
-            margin: 40px auto 0;
-            padding: 20px;
+            margin: 20px auto 0;
+            padding: 15px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -159,218 +140,17 @@
         
         .game-instructions h2 {
             color: var(--primary-color);
-            margin-bottom: 15px;
-            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
         }
         
-        .game-instructions ol {
-            padding-left: 20px;
-        }
-        
-        .game-instructions li {
+        .game-instructions p {
             margin-bottom: 10px;
         }
-        
-        .features-section {
-            padding: 60px 5%;
-            background-color: white;
-            text-align: center;
-        }
-        
-        .features-section h2 {
-            font-size: 2rem;
-            margin-bottom: 50px;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .feature-card {
-            background-color: var(--light-bg);
-            padding: 30px 20px;
-            border-radius: 12px;
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .feature-icon {
-            font-size: 40px;
-            margin-bottom: 20px;
-        }
-        
-        .feature-card h3 {
-            margin-bottom: 15px;
-            color: #222;
-        }
-        
+
         footer {
             background-color: #333;
             color: white;
-            padding: 20px 5%;
+            padding: 15px 5%;
             text-align: center;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: var(--footer-height);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            z-index: 99;
-        }
-        
-        .footer-nav {
-            margin-bottom: 10px;
-        }
-        
-        .footer-nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        
-        .footer-nav a:hover {
-            text-decoration: underline;
-        }
-        
-        .copyright {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .hero-section h1 {
-                font-size: 2rem;
-            }
-            
-            .hero-section p {
-                font-size: 1rem;
-            }
-            
-            nav ul li {
-                margin-left: 15px;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .logo-text {
-                display: none;
-            }
-            
-            nav ul li {
-                margin-left: 10px;
-            }
-            
-            nav ul li a {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <a href="/" class="logo">
-            <span class="logo-icon">🎮</span>
-            <span class="logo-text">Attention Trainers</span>
-        </a>
-        <nav>
-            <ul>
-                <li><a href="#game">游戏</a></li>
-                <li><a href="#instructions">说明</a></li>
-                <li><a href="#features">特点</a></li>
-                <li><a href="#about">关于</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <div class="main-content">
-        <section class="hero-section">
-            <h1>提升注意力的方块消除游戏</h1>
-            <p>通过有趣的消除方块游戏训练你的专注力和反应能力，提升脑力和认知能力。</p>
-            <a href="#game" class="cta-button">立即开始游戏</a>
-        </section>
-        
-        <section id="game" class="game-section">
-            <div class="game-container">
-                <iframe src="game.html" class="game-iframe" title="消除方块游戏" allowfullscreen></iframe>
-            </div>
-            
-            <div id="instructions" class="game-instructions">
-                <h2>游戏说明</h2>
-                <ol>
-                    <li>在8×8的网格内，四边分别是红色、蓝色、绿色和紫色。</li>
-                    <li>网格内会随机生成不同颜色的小方块（红色、蓝色、绿色、紫色）。</li>
-                    <li>通过滑动屏幕或使用键盘方向键，使方块在上下左右四个方向整体滑动。</li>
-                    <li>如果某一行或某一列在滑动方向存在空位置，则该行或该列可以滑到边。</li>
-                    <li>当方块触碰到与自己相同颜色的网格边缘时，该方块会被消除并得分。</li>
-                    <li>每消除一个方块累积1分，每次滑动若消除了n个方块，则会生成n+1个新方块。</li>
-                    <li>当无法通过滑动消除任何方块时，游戏结束。</li>
-                </ol>
-            </div>
-        </section>
-        
-        <section id="features" class="features-section">
-            <h2>游戏特点</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
-                    <h3>提升专注力</h3>
-                    <p>通过规划移动路径和预测方块行为，锻炼您的专注力和注意力分配能力。</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>增强反应速度</h3>
-                    <p>快速判断和反应，提高大脑处理视觉信息和做出决策的速度。</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🧩</div>
-                    <h3>培养解决问题能力</h3>
-                    <p>分析当前局面，制定最佳策略，培养逻辑思维和解决问题的能力。</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>锻炼空间思维</h3>
-                    <p>通过操控方块的方向和位置，增强空间感知和规划能力。</p>
-                </div>
-            </div>
-        </section>
-        
-        <section id="about" class="features-section" style="background-color: var(--light-bg);">
-            <h2>关于 Attention Trainers</h2>
-            <div style="max-width: 800px; margin: 0 auto; text-align: left;">
-                <p>Attention Trainers 致力于开发有趣且有效的游戏来帮助人们提升认知能力。我们的游戏设计基于认知科学研究，通过游戏化方式让大脑训练变得更加有趣。</p>
-                <p style="margin-top: 20px;">无论您是想提高工作效率、学习能力，还是保持大脑活力，我们的游戏都能为您提供一种轻松愉快的方式来达成目标。</p>
-                <p style="margin-top: 20px;">我们的消除方块游戏专为训练专注力、反应速度和决策能力而设计，每一次游戏都是对您大脑的全面锻炼。</p>
-            </div>
-        </section>
-    </div>
-    
-    <footer>
-        <div class="footer-nav">
-            <a href="/">首页</a>
-            <a href="#game">游戏</a>
-            <a href="#about">关于我们</a>
-            <a href="#" onclick="alert('感谢您的反馈！'); return false;">联系我们</a>
-        </div>
-        <div class="copyright">
-            &copy; 2025 Attention Trainers. 保留所有权利。
-        </div>
-    </footer>
-</body>
-</html>
+            position:
