@@ -13,6 +13,7 @@
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            touch-action: none; /* 禁止默认触摸行为 */
         }
         
         body {
@@ -204,14 +205,58 @@
             box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
         }
         
-        .instructions {
+        .tutorial {
             position: absolute;
-            bottom: -60px;
+            top: 0;
             left: 0;
-            right: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            padding: 20px;
             text-align: center;
-            color: #666;
-            font-size: 14px;
+        }
+        
+        .tutorial h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .tutorial p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #555;
+            max-width: 300px;
+        }
+        
+        .tutorial-img {
+            width: 80%;
+            max-width: 300px;
+            margin: 15px 0;
+        }
+        
+        #start-button {
+            padding: 10px 25px;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        .swipe-indicator {
+            display: inline-block;
+            font-size: 24px;
+            margin: 0 5px;
         }
     </style>
 </head>
@@ -233,10 +278,19 @@
                 <p>最终得分: <span id="final-score">0</span></p>
                 <button id="restart-button">重新开始</button>
             </div>
-        </div>
-        
-        <div class="instructions">
-            滑动屏幕以移动方块，将相同颜色的方块推到对应颜色的边缘可消除
+            
+            <div class="tutorial" id="tutorial">
+                <h2>游戏说明</h2>
+                <p>滑动方块，使相同颜色的方块与边缘碰撞可消除</p>
+                <div>
+                    <span class="swipe-indicator">👆</span>
+                    <span class="swipe-indicator">👇</span>
+                    <span class="swipe-indicator">👈</span>
+                    <span class="swipe-indicator">👉</span>
+                </div>
+                <p>红色方块碰到红色边缘消除，蓝色方块碰到蓝色边缘消除，依此类推</p>
+                <button id="start-button">开始游戏</button>
+            </div>
         </div>
     </div>
 
@@ -262,6 +316,14 @@
             const gameOverElement = document.getElementById('game-over');
             const finalScoreElement = document.getElementById('final-score');
             const restartButton = document.getElementById('restart-button');
+            const tutorialElement = document.getElementById('tutorial');
+            const startButton = document.getElementById('start-button');
+            
+            // 开始按钮事件
+            startButton.addEventListener('click', () => {
+                tutorialElement.style.display = 'none';
+                initGame();
+            });
             
             // 初始化游戏
             function initGame() {
@@ -572,13 +634,21 @@
             // 触摸事件处理
             let touchStartX = 0;
             let touchStartY = 0;
+            let gameBoard = document.getElementById('game-board');
             
-            document.addEventListener('touchstart', (e) => {
+            // 阻止默认滚动行为
+            gameBoard.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
-            }, { passive: true });
+            }, { passive: false });
             
-            document.addEventListener('touchend', (e) => {
+            gameBoard.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // 防止页面滚动
+            }, { passive: false });
+            
+            gameBoard.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 if (gameOver) return;
                 
                 const touchEndX = e.changedTouches[0].clientX;
@@ -609,7 +679,7 @@
                         }
                     }
                 }
-            }, { passive: true });
+            }, { passive: false });
             
             // 键盘控制
             document.addEventListener('keydown', (e) => {
@@ -638,8 +708,10 @@
             // 重新开始游戏
             restartButton.addEventListener('click', initGame);
             
-            // 启动游戏
-            initGame();
+            // 阻止整个文档的默认触摸行为
+            document.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            }, { passive: false });
         });
     </script>
 </body>
