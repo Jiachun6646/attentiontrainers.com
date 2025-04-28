@@ -2,593 +2,509 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>注意力方块消除</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注意力训练: 记忆配对挑战</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: none;
         }
         
         body {
-            background-color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            font-family: 'Arial', sans-serif;
+            background-color: white;
+            color: #333;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
         }
         
-        #game-container {
-            position: relative;
+        .container {
             width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            aspect-ratio: 1/1;
+            max-width: 800px;
             margin: 0 auto;
         }
         
-        #grid {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border: 2px solid #000;
-            background-color: #ffffff;
-            overflow: hidden;
-        }
-        
-        .block {
-            position: absolute;
-            border: 1px solid #ffffff;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 3px;
-        }
-        
-        .block.red { background-color: #FF3B30; }
-        .block.blue { background-color: #007AFF; }
-        .block.green { background-color: #34C759; }
-        .block.purple { background-color: #AF52DE; }
-        
-        .edge {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .edge.top {
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background-color: #FF3B30; /* Red */
-        }
-        
-        .edge.right {
-            top: 0;
-            right: 0;
-            width: 5px;
-            height: 100%;
-            background-color: #007AFF; /* Blue */
-        }
-        
-        .edge.bottom {
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background-color: #34C759; /* Green */
-        }
-        
-        .edge.left {
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background-color: #AF52DE; /* Purple */
-        }
-        
-        #score-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #000;
-            z-index: 10;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-        
-        #level-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #000;
-            z-index: 10;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-        
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        h1 {
             font-size: 24px;
-            font-weight: bold;
-            color: #000;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            display: none;
-            z-index: 100;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        @media (min-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        .card {
+            aspect-ratio: 3/4;
+            perspective: 1000px;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            user-select: none;
+        }
+        
+        .card-front {
+            background-color: #3498db;
+            transform: rotateY(180deg);
+            color: white;
+        }
+        
+        .card-back {
+            background-color: #f1c40f;
+            color: #2c3e50;
+            font-size: 1.5em;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card.matched .card-front {
+            background-color: #2ecc71;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
         }
         
         button {
-            background-color: #007AFF;
+            padding: 10px 20px;
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
-            margin-top: 15px;
-            border-radius: 20px;
-            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
         
         button:hover {
-            background-color: #0056b3;
+            background-color: #2980b9;
         }
         
-        #instructions {
-            position: absolute;
+        .modal {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            z-index: 200;
-            padding: 20px;
+            align-items: center;
+            z-index: 100;
         }
         
-        #instructions h2 {
-            margin-bottom: 20px;
-            color: #007AFF;
-        }
-        
-        #instructions p {
-            margin-bottom: 10px;
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
             text-align: center;
-            max-width: 80%;
+            max-width: 400px;
+            width: 90%;
         }
         
-        .vanish {
-            animation: vanish 0.5s ease forwards;
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
         }
         
-        @keyframes vanish {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0); opacity: 0; }
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .level-indicator {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            height: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 5px;
+            width: 100%;
+            transition: width 1s linear;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="score-container">分数: <span id="score">0</span></div>
-        <div id="level-container">关卡: <span id="level">1</span>/10</div>
-        <div id="grid">
-            <div class="edge top"></div>
-            <div class="edge right"></div>
-            <div class="edge bottom"></div>
-            <div class="edge left"></div>
+    <div class="container">
+        <h1>记忆配对挑战</h1>
+        <div class="level-indicator">等级: <span id="level">1</span></div>
+        <div class="game-info">
+            <div>分数: <span id="score">0</span></div>
+            <div>时间: <span id="timer">30</span>s</div>
         </div>
-        <div id="message">
-            <div id="message-text"></div>
-            <button id="next-level">下一关</button>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
         </div>
-        <div id="instructions">
-            <h2>方块消除游戏</h2>
-            <p>上下左右滑动屏幕移动所有方块</p>
-            <p>将方块移动到与其<strong>相同颜色</strong>的边缘可消除方块</p>
-            <p>消除所有方块进入下一关</p>
-            <p>共10关，每消除一个方块得1分</p>
-            <button id="start-game">开始游戏</button>
+        <div class="grid" id="grid"></div>
+        <div class="controls">
+            <button id="startBtn">开始游戏</button>
+        </div>
+    </div>
+    
+    <!-- 开始游戏模态框 -->
+    <div class="modal" id="startModal">
+        <div class="modal-content">
+            <h2>注意力训练游戏</h2>
+            <p>点击卡片并记住它们的位置，找出所有匹配的对子!</p>
+            <p>时间越快完成，得分越高!</p>
+            <button id="startGameBtn">开始!</button>
+        </div>
+    </div>
+    
+    <!-- 游戏结束模态框 -->
+    <div class="modal hidden" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">时间到!</h2>
+            <p>你的得分: <span id="finalScore">0</span></p>
+            <p id="gameOverMessage">继续努力!</p>
+            <button id="playAgainBtn">再玩一次</button>
+        </div>
+    </div>
+    
+    <!-- 下一关模态框 -->
+    <div class="modal hidden" id="nextLevelModal">
+        <div class="modal-content">
+            <h2>恭喜!</h2>
+            <p>你完成了等级 <span id="completedLevel">1</span>!</p>
+            <p>得分: <span id="levelScore">0</span></p>
+            <button id="nextLevelBtn">进入下一关</button>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 游戏配置
-            const config = {
-                gridSize: 8,
-                colors: ['red', 'blue', 'green', 'purple'],
-                colorMap: {
-                    'top': 'red',
-                    'right': 'blue',
-                    'bottom': 'green',
-                    'left': 'purple'
-                },
-                levelBlocks: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-            };
+            // 游戏变量
+            let cards = [];
+            let flippedCards = [];
+            let matchedPairs = 0;
+            let totalPairs = 0;
+            let score = 0;
+            let timer = 0;
+            let gameTimer;
+            let progressTimer;
+            let isPlaying = false;
+            let level = 1;
+            let baseTime = 30; // 基础时间（秒）
             
-            // 游戏状态
-            let state = {
-                blocks: [],
-                score: 0,
-                level: 1,
-                gridWidth: 0,
-                blockSize: 0,
-                touchStartX: 0,
-                touchStartY: 0,
-                gameActive: false
-            };
+            // 游戏符号
+            const symbols = [
+                '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍒', '🍑',
+                '🥝', '🍍', '🥥', '🥭', '🍅', '🥑', '🍆', '🥦', '🥬', '🌽',
+                '🎨', '🎭', '🎪', '🎡', '🎢', '🎯', '🎮', '🎲', '🧩', '🎸'
+            ];
             
-            // DOM 元素
-            const grid = document.getElementById('grid');
+            // DOM元素
+            const gridElement = document.getElementById('grid');
             const scoreElement = document.getElementById('score');
+            const timerElement = document.getElementById('timer');
             const levelElement = document.getElementById('level');
-            const messageElement = document.getElementById('message');
-            const messageTextElement = document.getElementById('message-text');
-            const nextLevelButton = document.getElementById('next-level');
-            const instructionsElement = document.getElementById('instructions');
-            const startGameButton = document.getElementById('start-game');
+            const startBtn = document.getElementById('startBtn');
+            const startModal = document.getElementById('startModal');
+            const gameOverModal = document.getElementById('gameOverModal');
+            const nextLevelModal = document.getElementById('nextLevelModal');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const nextLevelBtn = document.getElementById('nextLevelBtn');
+            const finalScoreElement = document.getElementById('finalScore');
+            const levelScoreElement = document.getElementById('levelScore');
+            const completedLevelElement = document.getElementById('completedLevel');
+            const gameOverTitle = document.getElementById('gameOverTitle');
+            const gameOverMessage = document.getElementById('gameOverMessage');
+            const progressBar = document.getElementById('progressBar');
             
-            // 初始化游戏尺寸
-            function initializeGameSize() {
-                state.gridWidth = grid.offsetWidth;
-                state.blockSize = state.gridWidth / config.gridSize;
+            // 初始化游戏
+            function initGame() {
+                resetGame();
+                showStartModal();
             }
             
-            // 创建方块
-            function createBlock(row, col, color) {
-                const block = document.createElement('div');
-                block.className = `block ${color}`;
-                block.style.width = `${state.blockSize}px`;
-                block.style.height = `${state.blockSize}px`;
-                block.style.left = `${col * state.blockSize}px`;
-                block.style.top = `${row * state.blockSize}px`;
+            // 重置游戏状态
+            function resetGame() {
+                stopTimer();
+                cards = [];
+                flippedCards = [];
+                matchedPairs = 0;
+                totalPairs = 0;
+                score = 0;
+                timer = getTimeForLevel(level);
+                isPlaying = false;
                 
-                grid.appendChild(block);
+                scoreElement.textContent = score;
+                timerElement.textContent = timer;
+                levelElement.textContent = level;
+                progressBar.style.width = '100%';
                 
-                return {
-                    element: block,
-                    row: row,
-                    col: col,
-                    color: color
-                };
+                gridElement.innerHTML = '';
             }
             
-            // 生成随机方块
-            function generateBlocks() {
-                // 清除所有现有方块
-                state.blocks.forEach(block => {
-                    if (block.element && block.element.parentNode) {
-                        block.element.parentNode.removeChild(block.element);
-                    }
+            // 根据等级获取对应的时间
+            function getTimeForLevel(level) {
+                return Math.max(10, baseTime - (level - 1) * 2);
+            }
+            
+            // 根据等级获取卡片数量
+            function getCardCountForLevel(level) {
+                if (level <= 3) return 12; // 6对
+                if (level <= 6) return 16; // 8对
+                if (level <= 9) return 20; // 10对
+                return 24; // 12对
+            }
+            
+            // 设置网格列数
+            function setGridColumns(cardCount) {
+                const cols = cardCount <= 12 ? 4 : 6;
+                gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            }
+            
+            // 创建卡片
+            function createCards() {
+                const cardCount = getCardCountForLevel(level);
+                totalPairs = cardCount / 2;
+                
+                setGridColumns(cardCount);
+                
+                // 选择符号
+                const gameSymbols = [...symbols].sort(() => 0.5 - Math.random()).slice(0, totalPairs);
+                const cardSymbols = [...gameSymbols, ...gameSymbols];
+                
+                // 随机排序
+                cardSymbols.sort(() => 0.5 - Math.random());
+                
+                // 创建卡片元素
+                cards = cardSymbols.map((symbol, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.index = index;
+                    card.dataset.symbol = symbol;
+                    
+                    const front = document.createElement('div');
+                    front.className = 'card-face card-front';
+                    front.textContent = symbol;
+                    
+                    const back = document.createElement('div');
+                    back.className = 'card-face card-back';
+                    back.textContent = '?';
+                    
+                    card.appendChild(front);
+                    card.appendChild(back);
+                    
+                    card.addEventListener('click', () => flipCard(card));
+                    
+                    gridElement.appendChild(card);
+                    return card;
                 });
+            }
+            
+            // 翻转卡片
+            function flipCard(card) {
+                if (!isPlaying || flippedCards.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+                    return;
+                }
                 
-                state.blocks = [];
+                card.classList.add('flipped');
+                flippedCards.push(card);
                 
-                // 根据当前关卡确定方块数量
-                const blockCount = config.levelBlocks[state.level - 1];
-                
-                // 创建已占用位置的集合
-                const occupiedPositions = new Set();
-                
-                // 生成随机方块
-                for (let i = 0; i < blockCount; i++) {
-                    let row, col;
-                    do {
-                        row = Math.floor(Math.random() * config.gridSize);
-                        col = Math.floor(Math.random() * config.gridSize);
-                    } while (occupiedPositions.has(`${row}-${col}`));
-                    
-                    occupiedPositions.add(`${row}-${col}`);
-                    
-                    const colorIndex = Math.floor(Math.random() * config.colors.length);
-                    const block = createBlock(row, col, config.colors[colorIndex]);
-                    state.blocks.push(block);
+                if (flippedCards.length === 2) {
+                    checkForMatch();
                 }
             }
             
-            // 更新分数
-            function updateScore(points) {
-                state.score += points;
-                scoreElement.textContent = state.score;
+            // 检查匹配
+            function checkForMatch() {
+                const [card1, card2] = flippedCards;
+                
+                if (card1.dataset.symbol === card2.dataset.symbol) {
+                    // 匹配成功
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    matchedPairs++;
+                    
+                    // 计算分数 - 根据剩余时间加分
+                    const pointsEarned = Math.max(10, Math.floor(20 * (timer / getTimeForLevel(level))));
+                    score += pointsEarned * level;
+                    scoreElement.textContent = score;
+                    
+                    // 检查游戏是否完成
+                    if (matchedPairs === totalPairs) {
+                        setTimeout(() => levelComplete(), 500);
+                    }
+                    
+                    flippedCards = [];
+                } else {
+                    // 不匹配
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        flippedCards = [];
+                    }, 1000);
+                }
             }
             
-            // 移动方块
-            function moveBlocks(direction) {
-                if (!state.gameActive) return;
+            // 开始计时器
+            function startTimer() {
+                stopTimer();
                 
-                let moved = false;
-                let removedBlocks = [];
+                timer = getTimeForLevel(level);
+                timerElement.textContent = timer;
                 
-                // 根据方向确定排序和边界检查
-                let sortedBlocks = [...state.blocks];
-                let edgeColor = '';
+                // 重置进度条
+                progressBar.style.width = '100%';
+                progressBar.style.transition = 'width 1s linear';
                 
-                switch (direction) {
-                    case 'up':
-                        sortedBlocks.sort((a, b) => a.row - b.row);
-                        edgeColor = config.colorMap.top;
-                        break;
-                    case 'right':
-                        sortedBlocks.sort((a, b) => b.col - a.col);
-                        edgeColor = config.colorMap.right;
-                        break;
-                    case 'down':
-                        sortedBlocks.sort((a, b) => b.row - a.row);
-                        edgeColor = config.colorMap.bottom;
-                        break;
-                    case 'left':
-                        sortedBlocks.sort((a, b) => a.col - b.col);
-                        edgeColor = config.colorMap.left;
-                        break;
+                gameTimer = setInterval(() => {
+                    timer--;
+                    timerElement.textContent = timer;
+                    
+                    // 进度条动画
+                    progressBar.style.width = `${(timer / getTimeForLevel(level)) * 100}%`;
+                    
+                    if (timer <= 0) {
+                        gameOver(false);
+                    }
+                }, 1000);
+            }
+            
+            // 停止计时器
+            function stopTimer() {
+                clearInterval(gameTimer);
+                clearInterval(progressTimer);
+            }
+            
+            // 游戏结束
+            function gameOver(completed) {
+                stopTimer();
+                isPlaying = false;
+                
+                finalScoreElement.textContent = score;
+                
+                if (completed) {
+                    gameOverTitle.textContent = '游戏完成!';
+                    
+                    if (score > 1000) {
+                        gameOverMessage.textContent = '太棒了! 你的注意力非常集中!';
+                    } else if (score > 500) {
+                        gameOverMessage.textContent = '做得好! 继续提高你的注意力!';
+                    } else {
+                        gameOverMessage.textContent = '不错的开始! 再接再厉!';
+                    }
+                } else {
+                    gameOverTitle.textContent = '时间到!';
+                    gameOverMessage.textContent = '再试一次，提高你的注意力!';
                 }
                 
-                // 创建网格占用情况
-                let grid = Array(config.gridSize).fill().map(() => Array(config.gridSize).fill(null));
-                
-                // 填充当前方块位置
-                state.blocks.forEach(block => {
-                    grid[block.row][block.col] = block;
-                });
-                
-                // 移动方块
-                sortedBlocks.forEach(block => {
-                    let newRow = block.row;
-                    let newCol = block.col;
-                    
-                    // 计算新位置
-                    switch (direction) {
-                        case 'up':
-                            while (newRow > 0 && grid[newRow - 1][newCol] === null) {
-                                grid[newRow][newCol] = null;
-                                newRow--;
-                                grid[newRow][newCol] = block;
-                                moved = true;
-                            }
-                            
-                            // 检查是否到达顶部边缘
-                            if (newRow === 0 && block.color === edgeColor) {
-                                removedBlocks.push(block);
-                                grid[newRow][newCol] = null;
-                            }
-                            break;
-                            
-                        case 'right':
-                            while (newCol < config.gridSize - 1 && grid[newRow][newCol + 1] === null) {
-                                grid[newRow][newCol] = null;
-                                newCol++;
-                                grid[newRow][newCol] = block;
-                                moved = true;
-                            }
-                            
-                            // 检查是否到达右侧边缘
-                            if (newCol === config.gridSize - 1 && block.color === edgeColor) {
-                                removedBlocks.push(block);
-                                grid[newRow][newCol] = null;
-                            }
-                            break;
-                            
-                        case 'down':
-                            while (newRow < config.gridSize - 1 && grid[newRow + 1][newCol] === null) {
-                                grid[newRow][newCol] = null;
-                                newRow++;
-                                grid[newRow][newCol] = block;
-                                moved = true;
-                            }
-                            
-                            // 检查是否到达底部边缘
-                            if (newRow === config.gridSize - 1 && block.color === edgeColor) {
-                                removedBlocks.push(block);
-                                grid[newRow][newCol] = null;
-                            }
-                            break;
-                            
-                        case 'left':
-                            while (newCol > 0 && grid[newRow][newCol - 1] === null) {
-                                grid[newRow][newCol] = null;
-                                newCol--;
-                                grid[newRow][newCol] = block;
-                                moved = true;
-                            }
-                            
-                            // 检查是否到达左侧边缘
-                            if (newCol === 0 && block.color === edgeColor) {
-                                removedBlocks.push(block);
-                                grid[newRow][newCol] = null;
-                            }
-                            break;
-                    }
-                    
-                    // 更新方块位置
-                    if (block.row !== newRow || block.col !== newCol) {
-                        block.row = newRow;
-                        block.col = newCol;
-                        block.element.style.top = `${newRow * state.blockSize}px`;
-                        block.element.style.left = `${newCol * state.blockSize}px`;
-                    }
-                });
-                
-                // 处理要移除的方块
-                if (removedBlocks.length > 0) {
-                    removedBlocks.forEach(block => {
-                        block.element.classList.add('vanish');
-                        
-                        setTimeout(() => {
-                            if (block.element.parentNode) {
-                                block.element.parentNode.removeChild(block.element);
-                            }
-                        }, 500);
-                        
-                        state.blocks = state.blocks.filter(b => b !== block);
-                        updateScore(1);
-                    });
-                    
-                    // 检查是否所有方块都被消除
-                    if (state.blocks.length === 0) {
-                        setTimeout(levelComplete, 1000);
-                    }
-                }
-                
-                return moved || removedBlocks.length > 0;
+                gameOverModal.classList.remove('hidden');
             }
             
             // 关卡完成
             function levelComplete() {
-                if (state.level === 10) {
-                    // 游戏通关
-                    messageTextElement.innerHTML = `恭喜您通关！<br>最终得分: ${state.score}`;
-                    nextLevelButton.textContent = '重新开始';
-                } else {
-                    // 进入下一关
-                    messageTextElement.innerHTML = `第 ${state.level} 关完成！<br>得分: ${state.score}`;
-                }
+                stopTimer();
+                isPlaying = false;
                 
-                messageElement.style.display = 'block';
-                state.gameActive = false;
+                completedLevelElement.textContent = level;
+                levelScoreElement.textContent = score;
+                
+                nextLevelModal.classList.remove('hidden');
             }
             
-            // 进入下一关或重新开始
+            // 进入下一关
             function nextLevel() {
-                messageElement.style.display = 'none';
-                
-                if (state.level === 10) {
-                    // 重新开始游戏
-                    state.level = 1;
-                    state.score = 0;
-                    scoreElement.textContent = state.score;
-                } else {
-                    // 进入下一关
-                    state.level++;
-                }
-                
-                levelElement.textContent = state.level;
-                generateBlocks();
-                state.gameActive = true;
+                level++;
+                nextLevelModal.classList.add('hidden');
+                resetGame();
+                levelElement.textContent = level;
+                startGame();
             }
             
-            // 触摸事件处理
-            function handleTouchStart(e) {
-                state.touchStartX = e.touches[0].clientX;
-                state.touchStartY = e.touches[0].clientY;
-                e.preventDefault();
+            // 开始游戏
+            function startGame() {
+                resetGame();
+                createCards();
+                isPlaying = true;
+                startTimer();
             }
             
-            function handleTouchMove(e) {
-                if (!state.gameActive) return;
-                e.preventDefault();
-            }
-            
-            function handleTouchEnd(e) {
-                if (!state.gameActive) return;
-                
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
-                
-                const diffX = touchEndX - state.touchStartX;
-                const diffY = touchEndY - state.touchStartY;
-                
-                // 确定滑动方向
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    // 水平滑动
-                    if (Math.abs(diffX) > 30) {
-                        if (diffX > 0) {
-                            moveBlocks('right');
-                        } else {
-                            moveBlocks('left');
-                        }
-                    }
-                } else {
-                    // 垂直滑动
-                    if (Math.abs(diffY) > 30) {
-                        if (diffY > 0) {
-                            moveBlocks('down');
-                        } else {
-                            moveBlocks('up');
-                        }
-                    }
-                }
-                
-                e.preventDefault();
-            }
-            
-            // 键盘事件处理
-            function handleKeyDown(e) {
-                if (!state.gameActive) return;
-                
-                switch (e.key) {
-                    case 'ArrowUp':
-                        moveBlocks('up');
-                        e.preventDefault();
-                        break;
-                    case 'ArrowRight':
-                        moveBlocks('right');
-                        e.preventDefault();
-                        break;
-                    case 'ArrowDown':
-                        moveBlocks('down');
-                        e.preventDefault();
-                        break;
-                    case 'ArrowLeft':
-                        moveBlocks('left');
-                        e.preventDefault();
-                        break;
-                }
-            }
-            
-            // 窗口大小改变时重新计算尺寸
-            function handleResize() {
-                initializeGameSize();
-                
-                // 更新所有方块的尺寸和位置
-                state.blocks.forEach(block => {
-                    block.element.style.width = `${state.blockSize}px`;
-                    block.element.style.height = `${state.blockSize}px`;
-                    block.element.style.left = `${block.col * state.blockSize}px`;
-                    block.element.style.top = `${block.row * state.blockSize}px`;
-                });
-            }
-            
-            // 初始化游戏
-            function initGame() {
-                instructionsElement.style.display = 'none';
-                initializeGameSize();
-                generateBlocks();
-                state.gameActive = true;
+            // 显示开始模态框
+            function showStartModal() {
+                startModal.classList.remove('hidden');
             }
             
             // 事件监听器
-            grid.addEventListener('touchstart', handleTouchStart, { passive: false });
-            grid.addEventListener('touchmove', handleTouchMove, { passive: false });
-            grid.addEventListener('touchend', handleTouchEnd, { passive: false });
-            document.addEventListener('keydown', handleKeyDown);
-            window.addEventListener('resize', handleResize);
-            nextLevelButton.addEventListener('click', nextLevel);
-            startGameButton.addEventListener('click', initGame);
+            startBtn.addEventListener('click', showStartModal);
+            startGameBtn.addEventListener('click', () => {
+                startModal.classList.add('hidden');
+                startGame();
+            });
             
-            // 初始化尺寸
-            initializeGameSize();
+            playAgainBtn.addEventListener('click', () => {
+                gameOverModal.classList.add('hidden');
+                level = 1;
+                resetGame();
+                startGame();
+            });
+            
+            nextLevelBtn.addEventListener('click', nextLevel);
+            
+            // 初始化游戏
+            initGame();
         });
     </script>
 </body>
