@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>注意力训练游戏 - Attention Trainers</title>
+    <title>数字消消乐 - AttentionTrainers</title>
     <style>
         * {
             margin: 0;
@@ -11,689 +11,496 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
-        
-        body {
-            background-color: white;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            padding: 10px;
-        }
-        
-        .game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .game-selector {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        
-        .game-btn {
-            padding: 10px 20px;
-            margin: 0 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .game-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .game-btn.active {
-            background-color: #357a38;
-            transform: scale(1.05);
-        }
-        
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .game-panel {
-            display: none;
+        html, body {
             width: 100%;
             height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            overflow: hidden;
+            background-color: white;
         }
-        
-        .game-panel.active {
-            display: flex;
-        }
-        
-        .game-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .game-info {
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 18px;
-        }
-        
-        .game-board {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
+        #game-container {
             width: 100%;
-            max-width: 500px;
-            max-height: 500px;
-            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
         }
-        
-        .number-search-board {
-            display: grid;
+        #game-header {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f0f0;
+            border-bottom: 2px solid #ddd;
+        }
+        #score-container, #time-container, #level-container {
+            display: flex;
+            align-items: center;
             gap: 5px;
+        }
+        #game-board {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 10px;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            margin: 0 auto;
-            width: 100%;
-            height: 100%;
-            max-width: 400px;
-            max-height: 400px;
-        }
-        
-        .number-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .number-cell:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .number-cell.correct {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .number-cell.wrong {
-            background-color: #f44336;
-            color: white;
-        }
-        
-        .click-game-board {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 400px;
-            max-height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
             overflow: hidden;
         }
-        
-        .target {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #4CAF50;
-            cursor: pointer;
+        .tile {
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: center;
-            color: white;
+            font-size: 24px;
             font-weight: bold;
-            transition: transform 0.1s;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #4CAF50;
+            color: white;
         }
-        
-        .target:hover {
-            transform: scale(1.1);
+        .tile.selected {
+            transform: scale(0.9);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            background-color: #2E7D32;
         }
-        
-        .controls {
-            display: flex;
-            margin-top: 20px;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
+        .tile.matched {
+            animation: fadeOut 0.5s forwards;
         }
-        
-        .btn {
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        #game-footer {
+            padding: 10px;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-top: 2px solid #ddd;
+        }
+        button {
             padding: 8px 16px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
             background-color: #2196F3;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
+            margin: 0 5px;
         }
-        
-        .btn:hover {
+        button:hover {
             background-color: #0b7dda;
         }
-        
-        .timer, .score, .level {
-            font-size: 18px;
-            margin: 5px 0;
-        }
-        
-        .game-over {
+        #start-screen, #game-over-screen {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: none;
+            display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
             z-index: 10;
         }
-        
-        .game-over.active {
-            display: flex;
+        #game-over-screen {
+            display: none;
         }
-        
-        .game-over h2 {
-            font-size: 32px;
+        h1 {
+            font-size: 36px;
             margin-bottom: 20px;
+            color: #333;
         }
-        
-        .game-over p {
-            font-size: 24px;
+        p {
+            font-size: 18px;
             margin-bottom: 30px;
+            color: #666;
+            max-width: 80%;
+            text-align: center;
         }
-        
-        @media (max-width: 768px) {
-            .game-btn {
-                padding: 8px 12px;
-                font-size: 14px;
+        .start-btn, .restart-btn {
+            padding: 12px 24px;
+            font-size: 20px;
+            background-color: #4CAF50;
+        }
+        .start-btn:hover, .restart-btn:hover {
+            background-color: #45a049;
+        }
+        #final-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #E91E63;
+            margin: 10px 0;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #ddd;
+            height: 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #timer-bar {
+            height: 100%;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            width: 100%;
+            transition: width 1s linear;
+        }
+        @media (max-width: 600px) {
+            #game-board {
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(7, 1fr);
             }
-            
-            .game-title {
+            .tile {
                 font-size: 20px;
             }
-            
-            .game-info {
+            h1 {
+                font-size: 24px;
+            }
+            p {
                 font-size: 16px;
-            }
-            
-            .number-cell {
-                font-size: 16px;
-            }
-            
-            .target {
-                width: 35px;
-                height: 35px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .game-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-            
-            .game-title {
-                font-size: 18px;
-            }
-            
-            .game-info {
-                font-size: 14px;
-            }
-            
-            .number-cell {
-                font-size: 14px;
-            }
-            
-            .target {
-                width: 30px;
-                height: 30px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="game-selector">
-            <button class="game-btn active" id="number-search-btn">数字搜索游戏</button>
-            <button class="game-btn" id="click-game-btn">专注力点击游戏</button>
+    <div id="game-container">
+        <div id="game-header">
+            <div id="score-container">
+                <span>分数:</span>
+                <span id="score">0</span>
+            </div>
+            <div id="level-container">
+                <span>级别:</span>
+                <span id="level">1</span>
+            </div>
+            <div id="time-container">
+                <div class="progress-container">
+                    <div id="timer-bar"></div>
+                </div>
+                <span id="time">60</span>秒
+            </div>
         </div>
-        
-        <div class="game-area">
-            <!-- 数字搜索游戏 -->
-            <div class="game-panel active" id="number-search-game">
-                <h2 class="game-title">数字搜索训练</h2>
-                <div class="game-info">
-                    <div class="timer">时间: <span id="ns-timer">60</span>秒</div>
-                    <div class="score">得分: <span id="ns-score">0</span></div>
-                    <div class="level">当前查找: <span id="ns-target">1</span></div>
-                </div>
-                <div class="game-board">
-                    <div class="number-search-board" id="ns-board"></div>
-                </div>
-                <div class="controls">
-                    <button class="btn" id="ns-start">开始游戏</button>
-                    <button class="btn" id="ns-difficulty">难度: 简单</button>
-                </div>
-                <div class="game-over" id="ns-game-over">
-                    <h2>游戏结束</h2>
-                    <p>您的得分: <span id="ns-final-score">0</span></p>
-                    <button class="btn" id="ns-restart">再玩一次</button>
-                </div>
-            </div>
-            
-            <!-- 专注力点击游戏 -->
-            <div class="game-panel" id="click-game">
-                <h2 class="game-title">专注力点击训练</h2>
-                <div class="game-info">
-                    <div class="timer">时间: <span id="cg-timer">30</span>秒</div>
-                    <div class="score">得分: <span id="cg-score">0</span></div>
-                    <div class="level">等级: <span id="cg-level">1</span></div>
-                </div>
-                <div class="game-board">
-                    <div class="click-game-board" id="cg-board"></div>
-                </div>
-                <div class="controls">
-                    <button class="btn" id="cg-start">开始游戏</button>
-                </div>
-                <div class="game-over" id="cg-game-over">
-                    <h2>游戏结束</h2>
-                    <p>您的得分: <span id="cg-final-score">0</span></p>
-                    <button class="btn" id="cg-restart">再玩一次</button>
-                </div>
-            </div>
+        <div id="game-board"></div>
+        <div id="game-footer">
+            <button id="hint-btn">提示</button>
+            <button id="reset-btn">重置</button>
         </div>
     </div>
 
+    <div id="start-screen">
+        <h1>数字消消乐</h1>
+        <p>相邻两个数字相加等于10时可以消除。选择两个相邻方块来消除它们。在时间结束前尽可能多地消除方块！</p>
+        <button class="start-btn">开始游戏</button>
+    </div>
+
+    <div id="game-over-screen">
+        <h1>游戏结束</h1>
+        <p>你的最终得分是:</p>
+        <div id="final-score">0</div>
+        <button class="restart-btn">再来一次</button>
+    </div>
+
     <script>
-        // 游戏切换逻辑
-        const numberSearchBtn = document.getElementById('number-search-btn');
-        const clickGameBtn = document.getElementById('click-game-btn');
-        const numberSearchGame = document.getElementById('number-search-game');
-        const clickGame = document.getElementById('click-game');
-        
-        numberSearchBtn.addEventListener('click', () => {
-            numberSearchBtn.classList.add('active');
-            clickGameBtn.classList.remove('active');
-            numberSearchGame.classList.add('active');
-            clickGame.classList.remove('active');
-        });
-        
-        clickGameBtn.addEventListener('click', () => {
-            clickGameBtn.classList.add('active');
-            numberSearchBtn.classList.remove('active');
-            clickGame.classList.add('active');
-            numberSearchGame.classList.remove('active');
-        });
-        
-        // 数字搜索游戏逻辑
-        const nsBoard = document.getElementById('ns-board');
-        const nsStartBtn = document.getElementById('ns-start');
-        const nsDifficultyBtn = document.getElementById('ns-difficulty');
-        const nsTimer = document.getElementById('ns-timer');
-        const nsScore = document.getElementById('ns-score');
-        const nsTarget = document.getElementById('ns-target');
-        const nsGameOver = document.getElementById('ns-game-over');
-        const nsFinalScore = document.getElementById('ns-final-score');
-        const nsRestartBtn = document.getElementById('ns-restart');
-        
-        let nsIsPlaying = false;
-        let nsTimeLeft = 60;
-        let nsCurrentScore = 0;
-        let nsCurrentTarget = 1;
-        let nsInterval;
-        let nsDifficulty = 'easy'; // easy, medium, hard
-        let nsGridSize = 5;
-        let nsNumberRange = 30;
-        
-        function nsSetupGame() {
-            // 根据难度设置参数
-            switch (nsDifficulty) {
-                case 'easy':
-                    nsGridSize = 5;
-                    nsNumberRange = 30;
-                    break;
-                case 'medium':
-                    nsGridSize = 6;
-                    nsNumberRange = 50;
-                    break;
-                case 'hard':
-                    nsGridSize = 8;
-                    nsNumberRange = 99;
-                    break;
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            // 游戏变量
+            const gameBoard = document.getElementById('game-board');
+            const scoreElement = document.getElementById('score');
+            const timeElement = document.getElementById('time');
+            const levelElement = document.getElementById('level');
+            const timerBar = document.getElementById('timer-bar');
+            const startScreen = document.getElementById('start-screen');
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const finalScoreElement = document.getElementById('final-score');
+            const hintBtn = document.getElementById('hint-btn');
+            const resetBtn = document.getElementById('reset-btn');
             
-            // 设置棋盘样式
-            nsBoard.style.gridTemplateColumns = `repeat(${nsGridSize}, 1fr)`;
-            nsBoard.style.gridTemplateRows = `repeat(${nsGridSize}, 1fr)`;
+            let boardSize = { rows: 6, cols: 6 };
+            let board = [];
+            let score = 0;
+            let level = 1;
+            let timeLeft = 60;
+            let gameInterval;
+            let selectedTiles = [];
+            let matchTarget = 10;
+            let hintTimeout;
             
-            // 清空棋盘
-            nsBoard.innerHTML = '';
-            
-            // 生成随机数字
-            let numbers = [];
-            let hasTarget = false;
-            
-            for (let i = 0; i < nsGridSize * nsGridSize; i++) {
-                let randomNum = Math.floor(Math.random() * nsNumberRange) + 1;
-                
-                // 确保目标数字至少出现一次
-                if (randomNum === nsCurrentTarget) {
-                    hasTarget = true;
+            // 响应式调整网格尺寸
+            function adjustGridSize() {
+                if (window.innerWidth <= 600) {
+                    boardSize = { rows: 7, cols: 5 };
+                } else {
+                    boardSize = { rows: 6, cols: 6 };
                 }
                 
-                numbers.push(randomNum);
+                gameBoard.style.gridTemplateColumns = `repeat(${boardSize.cols}, 1fr)`;
+                gameBoard.style.gridTemplateRows = `repeat(${boardSize.rows}, 1fr)`;
             }
             
-            // 如果没有目标数字，随机替换一个位置
-            if (!hasTarget) {
-                let randomPos = Math.floor(Math.random() * numbers.length);
-                numbers[randomPos] = nsCurrentTarget;
-            }
+            window.addEventListener('resize', () => {
+                adjustGridSize();
+                if (startScreen.style.display === 'none' && gameOverScreen.style.display === 'none') {
+                    resetBoard();
+                }
+            });
             
-            // 创建单元格
-            numbers.forEach(num => {
-                const cell = document.createElement('div');
-                cell.className = 'number-cell';
-                cell.textContent = num;
+            // 初始化游戏
+            function initGame() {
+                adjustGridSize();
+                resetGame();
                 
-                cell.addEventListener('click', () => {
-                    if (!nsIsPlaying) return;
-                    
-                    if (parseInt(cell.textContent) === nsCurrentTarget) {
-                        cell.classList.add('correct');
-                        nsCurrentScore += 10;
-                        nsScore.textContent = nsCurrentScore;
-                        
-                        // 进入下一个目标
-                        nsCurrentTarget++;
-                        nsTarget.textContent = nsCurrentTarget;
-                        
-                        // 短暂延迟后刷新棋盘
-                        setTimeout(() => {
-                            nsSetupGame();
-                        }, 300);
-                    } else {
-                        // 错误点击减分
-                        cell.classList.add('wrong');
-                        nsCurrentScore = Math.max(0, nsCurrentScore - 5);
-                        nsScore.textContent = nsCurrentScore;
-                        
-                        // 短暂显示错误后恢复
-                        setTimeout(() => {
-                            cell.classList.remove('wrong');
-                        }, 300);
-                    }
+                document.querySelector('.start-btn').addEventListener('click', startGame);
+                document.querySelector('.restart-btn').addEventListener('click', () => {
+                    gameOverScreen.style.display = 'none';
+                    resetGame();
+                    startGame();
                 });
                 
-                nsBoard.appendChild(cell);
-            });
-        }
-        
-        function nsStartGame() {
-            nsIsPlaying = true;
-            nsCurrentScore = 0;
-            nsCurrentTarget = 1;
-            nsTimeLeft = 60;
-            
-            nsScore.textContent = nsCurrentScore;
-            nsTarget.textContent = nsCurrentTarget;
-            nsTimer.textContent = nsTimeLeft;
-            
-            nsStartBtn.disabled = true;
-            nsDifficultyBtn.disabled = true;
-            nsGameOver.classList.remove('active');
-            
-            nsSetupGame();
-            
-            // 启动计时器
-            nsInterval = setInterval(() => {
-                nsTimeLeft--;
-                nsTimer.textContent = nsTimeLeft;
-                
-                if (nsTimeLeft <= 0) {
-                    nsEndGame();
-                }
-            }, 1000);
-        }
-        
-        function nsEndGame() {
-            nsIsPlaying = false;
-            clearInterval(nsInterval);
-            
-            nsStartBtn.disabled = false;
-            nsDifficultyBtn.disabled = false;
-            
-            nsFinalScore.textContent = nsCurrentScore;
-            nsGameOver.classList.add('active');
-        }
-        
-        // 切换难度
-        nsDifficultyBtn.addEventListener('click', () => {
-            if (nsIsPlaying) return;
-            
-            switch (nsDifficulty) {
-                case 'easy':
-                    nsDifficulty = 'medium';
-                    nsDifficultyBtn.textContent = '难度: 中等';
-                    break;
-                case 'medium':
-                    nsDifficulty = 'hard';
-                    nsDifficultyBtn.textContent = '难度: 困难';
-                    break;
-                case 'hard':
-                    nsDifficulty = 'easy';
-                    nsDifficultyBtn.textContent = '难度: 简单';
-                    break;
+                hintBtn.addEventListener('click', showHint);
+                resetBtn.addEventListener('click', resetBoard);
             }
             
-            nsSetupGame();
-        });
-        
-        nsStartBtn.addEventListener('click', nsStartGame);
-        nsRestartBtn.addEventListener('click', nsStartGame);
-        
-        // 初始化数字搜索游戏
-        nsSetupGame();
-        
-        // 专注力点击游戏逻辑
-        const cgBoard = document.getElementById('cg-board');
-        const cgStartBtn = document.getElementById('cg-start');
-        const cgTimer = document.getElementById('cg-timer');
-        const cgScore = document.getElementById('cg-score');
-        const cgLevel = document.getElementById('cg-level');
-        const cgGameOver = document.getElementById('cg-game-over');
-        const cgFinalScore = document.getElementById('cg-final-score');
-        const cgRestartBtn = document.getElementById('cg-restart');
-        
-        let cgIsPlaying = false;
-        let cgTimeLeft = 30;
-        let cgCurrentScore = 0;
-        let cgCurrentLevel = 1;
-        let cgInterval;
-        let cgTargetTimeout;
-        let cgTargetSpeed = 2000; // 目标出现间隔时间（毫秒）
-        let cgActiveTarget = null;
-        let cgTargetValue = 1; // 目标上的数字值
-        
-        function cgSpawnTarget() {
-            // 清除之前的目标
-            if (cgActiveTarget) {
-                cgBoard.removeChild(cgActiveTarget);
-                cgActiveTarget = null;
+            // 重置游戏状态
+            function resetGame() {
+                score = 0;
+                level = 1;
+                timeLeft = 60;
+                scoreElement.textContent = score;
+                levelElement.textContent = level;
+                timeElement.textContent = timeLeft;
+                timerBar.style.width = '100%';
+                clearInterval(gameInterval);
             }
             
-            // 创建新目标
-            const target = document.createElement('div');
-            target.className = 'target';
-            
-            // 随机位置（考虑目标大小）
-            const boardRect = cgBoard.getBoundingClientRect();
-            const targetSize = cgCurrentLevel <= 3 ? 40 : cgCurrentLevel <= 6 ? 35 : 30;
-            
-            const maxX = boardRect.width - targetSize;
-            const maxY = boardRect.height - targetSize;
-            
-            const posX = Math.floor(Math.random() * maxX);
-            const posY = Math.floor(Math.random() * maxY);
-            
-            target.style.width = `${targetSize}px`;
-            target.style.height = `${targetSize}px`;
-            target.style.left = `${posX}px`;
-            target.style.top = `${posY}px`;
-            
-            // 设置目标文本
-            target.textContent = cgTargetValue;
-            
-            target.addEventListener('click', () => {
-                if (!cgIsPlaying) return;
+            // 开始游戏
+            function startGame() {
+                startScreen.style.display = 'none';
+                resetBoard();
                 
-                // 增加分数
-                cgCurrentScore += cgCurrentLevel * 10;
-                cgScore.textContent = cgCurrentScore;
-                
-                // 清除当前目标
-                cgBoard.removeChild(target);
-                cgActiveTarget = null;
-                
-                // 检查是否升级
-                if (cgCurrentScore >= cgCurrentLevel * 100) {
-                    cgCurrentLevel++;
-                    cgLevel.textContent = cgCurrentLevel;
-                    cgTargetSpeed = Math.max(800, 2000 - (cgCurrentLevel * 200));
-                }
-                
-                // 增加目标值
-                cgTargetValue++;
-                
-                // 生成新目标
-                clearTimeout(cgTargetTimeout);
-                cgTargetTimeout = setTimeout(cgSpawnTarget, 300);
-            });
-            
-            cgBoard.appendChild(target);
-            cgActiveTarget = target;
-            
-            // 目标消失时间（根据等级调整）
-            const disappearTime = Math.max(1000, 3000 - (cgCurrentLevel * 200));
-            
-            // 如果用户未点击，一段时间后目标消失
-            cgTargetTimeout = setTimeout(() => {
-                if (cgActiveTarget) {
-                    cgBoard.removeChild(cgActiveTarget);
-                    cgActiveTarget = null;
+                gameInterval = setInterval(() => {
+                    timeLeft--;
+                    timeElement.textContent = timeLeft;
+                    timerBar.style.width = `${(timeLeft / 60) * 100}%`;
                     
-                    // 如果错过目标，扣分
-                    cgCurrentScore = Math.max(0, cgCurrentScore - 5);
-                    cgScore.textContent = cgCurrentScore;
+                    if (timeLeft <= 10) {
+                        timerBar.style.backgroundColor = '#FF5252';
+                    } else {
+                        timerBar.style.backgroundColor = '#4CAF50';
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }, 1000);
+            }
+            
+            // 结束游戏
+            function endGame() {
+                clearInterval(gameInterval);
+                gameOverScreen.style.display = 'flex';
+                finalScoreElement.textContent = score;
+            }
+            
+            // 生成游戏板
+            function resetBoard() {
+                gameBoard.innerHTML = '';
+                board = [];
+                selectedTiles = [];
+                
+                for (let row = 0; row < boardSize.rows; row++) {
+                    board[row] = [];
+                    for (let col = 0; col < boardSize.cols; col++) {
+                        const value = Math.floor(Math.random() * 9) + 1;
+                        board[row][col] = value;
+                        
+                        const tile = document.createElement('div');
+                        tile.className = 'tile';
+                        tile.textContent = value;
+                        tile.dataset.row = row;
+                        tile.dataset.col = col;
+                        
+                        // 根据数字设置不同颜色
+                        const hue = (value * 30) % 360;
+                        tile.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+                        
+                        tile.addEventListener('click', () => selectTile(tile, row, col));
+                        
+                        gameBoard.appendChild(tile);
+                    }
                 }
                 
-                // 如果游戏仍在进行，生成新目标
-                if (cgIsPlaying) {
-                    cgTargetTimeout = setTimeout(cgSpawnTarget, cgTargetSpeed);
+                // 确保有效的选择
+                if (!checkForPossibleMatches()) {
+                    resetBoard();
                 }
-            }, disappearTime);
-        }
-        
-        function cgStartGame() {
-            cgIsPlaying = true;
-            cgCurrentScore = 0;
-            cgCurrentLevel = 1;
-            cgTimeLeft = 30;
-            cgTargetValue = 1;
-            
-            cgScore.textContent = cgCurrentScore;
-            cgLevel.textContent = cgCurrentLevel;
-            cgTimer.textContent = cgTimeLeft;
-            
-            cgStartBtn.disabled = true;
-            cgGameOver.classList.remove('active');
-            
-            // 清除之前的目标
-            if (cgActiveTarget) {
-                cgBoard.removeChild(cgActiveTarget);
-                cgActiveTarget = null;
             }
             
-            // 生成第一个目标
-            cgSpawnTarget();
+            // 检查是否有可能的匹配
+            function checkForPossibleMatches() {
+                for (let row = 0; row < boardSize.rows; row++) {
+                    for (let col = 0; col < boardSize.cols; col++) {
+                        // 检查右边
+                        if (col < boardSize.cols - 1) {
+                            if (board[row][col] + board[row][col + 1] === matchTarget) {
+                                return true;
+                            }
+                        }
+                        
+                        // 检查下方
+                        if (row < boardSize.rows - 1) {
+                            if (board[row][col] + board[row + 1][col] === matchTarget) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
             
-            // 启动计时器
-            cgInterval = setInterval(() => {
-                cgTimeLeft--;
-                cgTimer.textContent = cgTimeLeft;
+            // 查找可能的匹配
+            function findMatch() {
+                for (let row = 0; row < boardSize.rows; row++) {
+                    for (let col = 0; col < boardSize.cols; col++) {
+                        // 检查右边
+                        if (col < boardSize.cols - 1) {
+                            if (board[row][col] + board[row][col + 1] === matchTarget) {
+                                return [
+                                    { row, col },
+                                    { row, col: col + 1 }
+                                ];
+                            }
+                        }
+                        
+                        // 检查下方
+                        if (row < boardSize.rows - 1) {
+                            if (board[row][col] + board[row + 1][col] === matchTarget) {
+                                return [
+                                    { row, col },
+                                    { row: row + 1, col }
+                                ];
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+            
+            // 显示提示
+            function showHint() {
+                clearTimeout(hintTimeout);
                 
-                if (cgTimeLeft <= 0) {
-                    cgEndGame();
+                const match = findMatch();
+                if (!match) {
+                    resetBoard();
+                    return;
                 }
-            }, 1000);
-        }
-        
-        function cgEndGame() {
-            cgIsPlaying = false;
-            clearInterval(cgInterval);
-            clearTimeout(cgTargetTimeout);
-            
-            // 清除活动目标
-            if (cgActiveTarget) {
-                cgBoard.removeChild(cgActiveTarget);
-                cgActiveTarget = null;
+                
+                const [pos1, pos2] = match;
+                
+                const tile1 = document.querySelector(`[data-row="${pos1.row}"][data-col="${pos1.col}"]`);
+                const tile2 = document.querySelector(`[data-row="${pos2.row}"][data-col="${pos2.col}"]`);
+                
+                tile1.classList.add('hint');
+                tile2.classList.add('hint');
+                
+                tile1.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.8)';
+                tile2.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.8)';
+                
+                hintTimeout = setTimeout(() => {
+                    tile1.classList.remove('hint');
+                    tile2.classList.remove('hint');
+                    tile1.style.boxShadow = '';
+                    tile2.style.boxShadow = '';
+                }, 1500);
             }
             
-            cgStartBtn.disabled = false;
-            
-            cgFinalScore.textContent = cgCurrentScore;
-            cgGameOver.classList.add('active');
-        }
-        
-        cgStartBtn.addEventListener('click', cgStartGame);
-        cgRestartBtn.addEventListener('click', cgStartGame);
-        
-        // 初始化界面设置
-        window.addEventListener('resize', () => {
-            // 调整游戏界面以适应屏幕
-            if (nsBoard) {
-                const boardSize = Math.min(
-                    document.querySelector('.game-board').offsetWidth,
-                    document.querySelector('.game-board').offsetHeight
-                );
-                nsBoard.style.maxWidth = `${boardSize}px`;
-                nsBoard.style.maxHeight = `${boardSize}px`;
+            // 选择方块
+            function selectTile(tile, row, col) {
+                // 如果已经选中，则取消选择
+                if (selectedTiles.length === 1 && 
+                    selectedTiles[0].row === row && 
+                    selectedTiles[0].col === col) {
+                    selectedTiles = [];
+                    document.querySelectorAll('.tile.selected').forEach(t => {
+                        t.classList.remove('selected');
+                    });
+                    return;
+                }
+                
+                // 选择方块
+                tile.classList.add('selected');
+                selectedTiles.push({ row, col, element: tile });
+                
+                // 如果选择了两个方块，检查它们是否匹配
+                if (selectedTiles.length === 2) {
+                    const [first, second] = selectedTiles;
+                    
+                    // 检查是否相邻
+                    const isAdjacent = 
+                        (Math.abs(first.row - second.row) === 1 && first.col === second.col) ||
+                        (Math.abs(first.col - second.col) === 1 && first.row === second.row);
+                    
+                    // 检查数字之和是否等于目标值
+                    const sum = board[first.row][first.col] + board[second.row][second.col];
+                    
+                    if (isAdjacent && sum === matchTarget) {
+                        // 匹配成功
+                        first.element.classList.add('matched');
+                        second.element.classList.add('matched');
+                        
+                        // 更新分数
+                        score += level * 10;
+                        scoreElement.textContent = score;
+                        
+                        // 根据分数提高等级
+                        if (score >= level * 100) {
+                            level++;
+                            levelElement.textContent = level;
+                            timeLeft = Math.min(timeLeft + 10, 60);
+                            timeElement.textContent = timeLeft;
+                        }
+                        
+                        // 延迟后替换匹配的方块
+                        setTimeout(() => {
+                            replaceTiles();
+                        }, 500);
+                    } else {
+                        // 匹配失败，取消选择
+                        setTimeout(() => {
+                            selectedTiles.forEach(({ element }) => {
+                                element.classList.remove('selected');
+                            });
+                            selectedTiles = [];
+                        }, 500);
+                    }
+                }
             }
+            
+            // 替换已匹配的方块
+            function replaceTiles() {
+                selectedTiles.forEach(({ row, col, element }) => {
+                    // 生成新的数字
+                    const newValue = Math.floor(Math.random() * 9) + 1;
+                    board[row][col] = newValue;
+                    
+                    // 更新方块
+                    element.textContent = newValue;
+                    element.classList.remove('selected', 'matched');
+                    
+                    // 更新颜色
+                    const hue = (newValue * 30) % 360;
+                    element.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+                });
+                
+                selectedTiles = [];
+                
+                // 检查是否还有可能的匹配
+                if (!checkForPossibleMatches()) {
+                    resetBoard();
+                }
+            }
+            
+            // 初始化游戏
+            initGame();
         });
-        
-        // 初始触发一次调整
-        setTimeout(() => {
-            window.dispatchEvent(new Event('resize'));
-        }, 100);
     </script>
 </body>
 </html>
