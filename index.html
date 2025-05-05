@@ -1,730 +1,197 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>注意力训练 - Attention Trainers</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>AttentionTrainers - 提升你的注意力和计算能力</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
-            --accent-color: #FF9800;
-            --text-color: #333;
-            --bg-color: #f5f5f5;
-            --card-bg: #ffffff;
-            --header-height: 70px;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #f5f5f5;
+            color: #333;
             line-height: 1.6;
         }
         
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 1rem;
         }
         
-        /* 头部导航 */
-        header {
-            background-color: var(--card-bg);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin: 1.5rem 0 1rem;
+            color: #4CAF50;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .game-container {
             width: 100%;
-            z-index: 100;
-            height: var(--header-height);
-        }
-        
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
-        
-        .nav-links li {
-            margin-left: 30px;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--primary-color);
-        }
-        
-        .menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-        
-        /* 主要内容 */
-        main {
-            padding-top: calc(var(--header-height) + 30px);
-            min-height: 100vh;
-        }
-        
-        .hero {
-            text-align: center;
-            padding: 50px 0;
-        }
-        
-        .hero h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-        }
-        
-        .hero p {
-            font-size: 20px;
-            max-width: 800px;
-            margin: 0 auto 30px;
-            color: #666;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-        
-        .btn:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-        }
-        
-        .btn-secondary:hover {
-            background-color: #0b7dda;
-        }
-        
-        .games-section {
-            padding: 50px 0;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .section-title h2 {
-            font-size: 36px;
-            color: var(--primary-color);
-        }
-        
-        .section-title p {
-            font-size: 18px;
-            color: #666;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .game-card {
-            background-color: var(--card-bg);
+            margin: 2rem auto;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        .game-thumbnail {
-            height: 200px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .game-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .game-thumbnail .play-btn {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .game-card:hover .play-btn {
-            opacity: 1;
-        }
-        
-        .game-info {
-            padding: 20px;
-        }
-        
-        .game-info h3 {
-            font-size: 22px;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-        
-        .game-info p {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-        
-        .game-info .btn {
-            width: 100%;
-            text-align: center;
-        }
-        
-        /* 游戏模态框 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            overflow: auto;
-        }
-        
-        .modal-content {
-            position: relative;
-            background-color: white;
-            margin: 50px auto;
-            padding: 0;
-            width: 90%;
-            max-width: 900px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            font-size: 22px;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: white;
-            cursor: pointer;
-        }
-        
-        .modal-body {
-            padding: 0;
-            height: 70vh;
-            min-height: 500px;
-            position: relative;
-        }
-        
-        .game-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        /* 关于部分 */
-        .about-section {
-            padding: 50px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             background-color: white;
         }
         
-        .about-content {
-            display: flex;
-            align-items: center;
-            gap: 50px;
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
         }
         
-        .about-text {
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
             flex: 1;
-        }
-        
-        .about-text h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-        }
-        
-        .about-text p {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        
-        .about-image {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .about-image img {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* 详细信息部分 */
-        .info-section {
-            padding: 50px 0;
-            background-color: #f9f9f9;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .info-card {
+            min-width: 300px;
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .info-icon {
-            font-size: 50px;
-            color: var(--primary-color);
-            margin-bottom: 20px;
+        .feature h3 {
+            color: #4CAF50;
+            margin-bottom: 0.8rem;
+            font-size: 1.4rem;
         }
         
-        .info-card h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: var(--text-color);
+        .emoji-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
         
-        .info-card p {
-            font-size: 16px;
-            color: #666;
-        }
-        
-        /* 页脚 */
         footer {
             background-color: #333;
             color: white;
-            padding: 30px 0;
-        }
-        
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .footer-logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .footer-links {
-            display: flex;
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-left: 20px;
-        }
-        
-        .footer-links a {
-            text-decoration: none;
-            color: #ccc;
-            transition: color 0.3s;
-        }
-        
-        .footer-links a:hover {
-            color: white;
-        }
-        
-        .footer-bottom {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #444;
-            font-size: 14px;
-            color: #999;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
         }
         
-        /* 响应式设计 */
-        @media (max-width: 992px) {
-            .about-content {
-                flex-direction: column;
-            }
-            
-            .about-image {
-                order: -1;
-            }
+        .cta-button {
+            display: inline-block;
+            background-color: #FF5722;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: #E64A19;
         }
         
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: var(--header-height);
-                left: 0;
-                width: 100%;
-                background-color: var(--card-bg);
-                flex-direction: column;
-                padding: 20px 0;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            h1 {
+                font-size: 2rem;
             }
             
-            .nav-links.active {
-                display: flex;
+            h2 {
+                font-size: 1.5rem;
             }
             
-            .nav-links li {
-                margin: 10px 0;
-                text-align: center;
-            }
-            
-            .menu-btn {
-                display: block;
-            }
-            
-            .hero h1 {
-                font-size: 36px;
-            }
-            
-            .hero p {
-                font-size: 18px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 20px auto;
-            }
-            
-            .modal-body {
-                height: 60vh;
+            .game-frame {
+                height: 500px;
             }
         }
         
         @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 28px;
+            .game-frame {
+                height: 450px;
             }
             
-            .hero p {
-                font-size: 16px;
-            }
-            
-            .section-title h2 {
-                font-size: 28px;
-            }
-            
-            .game-thumbnail {
-                height: 150px;
+            .feature {
+                min-width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 头部导航 -->
     <header>
         <div class="container">
-            <nav>
-                <div class="logo">
-                    <img src="/images/logo.png" alt="Logo">
-                    <span>Attention Trainers</span>
-                </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="#" class="active">首页</a></li>
-                    <li><a href="#games">游戏</a></li>
-                    <li><a href="#about">关于</a></li>
-                    <li><a href="#info">益处</a></li>
-                </ul>
-                <button class="menu-btn" id="menu-btn">☰</button>
-            </nav>
+            <h1>AttentionTrainers</h1>
+            <p>提升你的注意力和数字计算能力的趣味游戏平台</p>
         </div>
     </header>
     
-    <!-- 主要内容 -->
-    <main>
-        <!-- 英雄区域 -->
-        <section class="hero">
-            <div class="container">
-                <h1>训练您的注意力，提升专注力</h1>
-                <p>欢迎来到 Attention Trainers，这里有专为提升注意力和专注力而设计的益智游戏集合。每天只需几分钟，就能锻炼您的大脑，提高工作和学习效率。</p>
-                <a href="#games" class="btn">开始训练</a>
+    <main class="container">
+        <section>
+            <h2>数字消消乐</h2>
+            <p>通过这个有趣的游戏训练你的注意力和数字敏感度。找出相邻且和为10的数字方块，在规定时间内获得最高分！</p>
+            
+            <div class="game-container">
+                <iframe src="game.html" class="game-frame" title="数字消消乐" allowfullscreen></iframe>
             </div>
         </section>
         
-        <!-- 游戏区域 -->
-        <section class="games-section" id="games">
-            <div class="container">
-                <div class="section-title">
-                    <h2>我们的游戏</h2>
-                    <p>选择下面的游戏开始您的注意力训练之旅。每个游戏都针对不同类型的注意力技能进行训练。</p>
+        <section>
+            <h2>为什么选择我们的训练游戏？</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="emoji-icon">🧠</div>
+                    <h3>提升注意力</h3>
+                    <p>在有限的时间内快速找出数字组合，锻炼你的注意力分配能力和专注度。</p>
                 </div>
                 
-                <div class="games-grid">
-                    <!-- 游戏卡片 1 -->
-                    <div class="game-card">
-                        <div class="game-thumbnail">
-                            <img src="/images/number.png" alt="数字搜索游戏">
-                            <div class="play-btn">▶</div>
-                        </div>
-                        <div class="game-info">
-                            <h3>数字搜索训练</h3>
-                            <p>在网格中按顺序找出数字，训练视觉搜索能力和持续注意力。有三个难度级别可选。</p>
-                            <button class="btn" onclick="openGame('number-search')">开始玩</button>
-                        </div>
-                    </div>
-                    
-                    <!-- 游戏卡片 2 -->
-                    <div class="game-card">
-                        <div class="game-thumbnail">
-                            <img src="/images/click.png" alt="专注力点击游戏">
-                            <div class="play-btn">▶</div>
-                        </div>
-                        <div class="game-info">
-                            <h3>专注力点击训练</h3>
-                            <p>快速点击出现的目标，训练反应速度和注意力。随着等级提高，难度会增加。</p>
-                            <button class="btn" onclick="openGame('click-game')">开始玩</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- 关于部分 -->
-        <section class="about-section" id="about">
-            <div class="container">
-                <div class="about-content">
-                    <div class="about-text">
-                        <h2>关于 Attention Trainers</h2>
-                        <p>Attention Trainers 是一个专注于提供高质量注意力训练游戏的平台。我们的目标是通过有趣且有效的游戏帮助人们提升注意力、专注力和认知能力。</p>
-                        <p>我们的游戏基于认知科学研究，设计用来锻炼大脑的不同认知功能，特别是注意力控制、视觉搜索和反应速度。每个游戏都有不同的难度级别，适合各个年龄段的用户。</p>
-                        <a href="#games" class="btn">探索游戏</a>
-                    </div>
-                    <div class="about-image">
-                        <img src="/images/logo.png" alt="关于我们">
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- 详细信息部分 -->
-        <section class="info-section" id="info">
-            <div class="container">
-                <div class="section-title">
-                    <h2>注意力训练的益处</h2>
-                    <p>通过定期的注意力训练，您可以获得以下益处：</p>
+                <div class="feature">
+                    <div class="emoji-icon">🔢</div>
+                    <h3>增强数学能力</h3>
+                    <p>通过反复练习数字计算，加强数字敏感度和心算能力，让数学变得更简单。</p>
                 </div>
                 
-                <div class="info-grid">
-                    <!-- 信息卡片 1 -->
-                    <div class="info-card">
-                        <div class="info-icon">🧠</div>
-                        <h3>提高认知能力</h3>
-                        <p>注意力训练可以提高工作记忆、处理速度和认知灵活性，帮助您更有效地处理信息。</p>
-                    </div>
-                    
-                    <!-- 信息卡片 2 -->
-                    <div class="info-card">
-                        <div class="info-icon">📚</div>
-                        <h3>提升学习效率</h3>
-                        <p>更好的注意力意味着更高效的学习，无论是学生还是终身学习者都能从中受益。</p>
-                    </div>
-                    
-                    <!-- 信息卡片 3 -->
-                    <div class="info-card">
-                        <div class="info-icon">⚡</div>
-                        <h3>增强专注力</h3>
-                        <p>训练您的大脑更长时间地保持专注，减少分心，提高工作和学习的质量。</p>
-                    </div>
+                <div class="feature">
+                    <div class="emoji-icon">⏱️</div>
+                    <h3>压力应对</h3>
+                    <p>在倒计时压力下进行决策，提高在紧张环境中的思考和反应能力。</p>
                 </div>
             </div>
+        </section>
+        
+        <section style="text-align: center; margin: 3rem 0;">
+            <h2>开始你的注意力训练之旅</h2>
+            <p>每天花几分钟玩游戏，持续提升你的认知能力。</p>
+            <a href="#" class="cta-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">立即开始游戏</a>
         </section>
     </main>
     
-    <!-- 游戏模态框 -->
-    <div class="modal" id="game-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">游戏标题</h3>
-                <button class="close-btn" onclick="closeGame()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <iframe id="game-iframe" class="game-iframe" src="" frameborder="0"></iframe>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 页脚 -->
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">Attention Trainers</div>
-                <ul class="footer-links">
-                    <li><a href="#">首页</a></li>
-                    <li><a href="#games">游戏</a></li>
-                    <li><a href="#about">关于</a></li>
-                    <li><a href="#info">益处</a></li>
-                </ul>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Attention Trainers. 保留所有权利。</p>
-            </div>
+            <p>&copy; 2025 AttentionTrainers.com - 提升注意力和认知能力的游戏平台</p>
         </div>
     </footer>
-    
-    <script>
-        // 移动导航菜单
-        const menuBtn = document.getElementById('menu-btn');
-        const navLinks = document.getElementById('nav-links');
-        
-        menuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-        
-        // 当用户点击链接时关闭导航菜单
-        const navItems = document.querySelectorAll('.nav-links a');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-        
-        // 游戏模态框
-        const gameModal = document.getElementById('game-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const gameIframe = document.getElementById('game-iframe');
-        
-        function openGame(gameType) {
-            if (gameType === 'number-search') {
-                modalTitle.textContent = '数字搜索训练';
-                gameIframe.src = 'game.html';
-            } else if (gameType === 'click-game') {
-                modalTitle.textContent = '专注力点击训练';
-                gameIframe.src = 'game.html#click-game';
-            }
-            
-            gameModal.style.display = 'block';
-            document.body.style.overflow = 'hidden'; // 防止背景滚动
-        }
-        
-        function closeGame() {
-            gameModal.style.display = 'none';
-            gameIframe.src = '';
-            document.body.style.overflow = 'auto'; // 恢复背景滚动
-        }
-        
-        // 点击模态框外部关闭
-        window.addEventListener('click', (event) => {
-            if (event.target === gameModal) {
-                closeGame();
-            }
-        });
-        
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    const headerOffset = 80;
-                    const elementPosition = targetElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
