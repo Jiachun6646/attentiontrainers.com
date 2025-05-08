@@ -1,88 +1,99 @@
-
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快速计算训练</title>
+    <title>Attention Trainer Game</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
         }
         
         body {
+            font-family: Arial, sans-serif;
             background-color: white;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #game-container {
+            position: relative;
+            flex-grow: 1;
+            background-color: white;
+        }
+        
+        #target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ff4757;
+            cursor: pointer;
+            display: none;
+            transition: transform 0.1s;
+        }
+        
+        #target:active {
+            transform: scale(0.9);
+        }
+        
+        #ui-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #f1f2f6;
+        }
+        
+        .info-box {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
         }
         
-        .game-container {
+        .info-label {
+            font-size: 14px;
+            color: #2f3542;
+        }
+        
+        .info-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e90ff;
+        }
+        
+        #start-screen, #end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 600px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            text-align: center;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: calc(24px + 1vw);
-        }
-        
-        .stats {
+            height: 100%;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            font-size: calc(16px + 0.5vw);
-        }
-        
-        .problem {
-            font-size: calc(32px + 2vw);
-            margin-bottom: 30px;
-            min-height: 80px;
-            display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 10;
         }
         
-        .answer-input {
-            font-size: calc(20px + 1vw);
-            padding: 10px 15px;
-            width: 100%;
-            max-width: 200px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            text-align: center;
+        #end-screen {
+            display: none;
+        }
+        
+        .screen-title {
+            font-size: 36px;
             margin-bottom: 20px;
+            color: #2f3542;
         }
         
-        .answer-input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            padding: 10px 20px;
-            font-size: calc(16px + 0.5vw);
-            background-color: #4CAF50;
+        .game-btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #1e90ff;
             color: white;
             border: none;
             border-radius: 5px;
@@ -90,490 +101,357 @@
             transition: background-color 0.3s;
         }
         
-        button:hover {
-            background-color: #388E3C;
+        .game-btn:hover {
+            background-color: #147bcd;
         }
         
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        #results {
+            margin: 20px 0;
+            font-size: 18px;
         }
         
-        .result {
-            font-size: calc(18px + 0.5vw);
-            margin-bottom: 20px;
-            min-height: 30px;
+        .result-item {
+            margin: 5px 0;
         }
         
-        .correct {
-            color: #4CAF50;
-        }
-        
-        .incorrect {
-            color: #F44336;
-        }
-        
-        .settings {
+        #difficulty-selector {
             margin-top: 20px;
-            text-align: left;
-            width: 100%;
-        }
-        
-        .settings h3 {
-            margin-bottom: 10px;
-            font-size: calc(18px + 0.5vw);
-        }
-        
-        .setting-group {
-            margin-bottom: 15px;
-        }
-        
-        .setting-label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: calc(14px + 0.3vw);
-        }
-        
-        select {
-            padding: 8px;
-            font-size: calc(14px + 0.3vw);
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        
-        .countdown {
-            font-size: calc(24px + 1vw);
-            color: #F44336;
-            margin-bottom: 10px;
-            min-height: 40px;
-        }
-        
-        .game-over {
-            display: none;
+            display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
         
-        .summary {
-            margin: 20px 0;
-            font-size: calc(16px + 0.5vw);
-            text-align: left;
-            width: 100%;
-        }
-        
-        .summary table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .summary td, .summary th {
-            border: 1px solid #ddd;
+        #difficulty-selector select {
             padding: 8px;
-            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
         
-        .summary th {
-            background-color: #f2f2f2;
-        }
-        
-        @media (max-width: 480px) {
-            .buttons {
-                flex-direction: column;
-            }
-            
-            .game-container {
-                padding: 15px;
-            }
+        .level-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>快速计算训练</h1>
+    <div id="ui-container">
+        <div class="info-box">
+            <span class="info-label">时间</span>
+            <span id="timer" class="info-value">30s</span>
+        </div>
+        <div class="info-box">
+            <span class="info-label">得分</span>
+            <span id="score" class="info-value">0</span>
+        </div>
+        <div class="info-box">
+            <span class="info-label">目标</span>
+            <span id="targets-hit" class="info-value">0/30</span>
+        </div>
+    </div>
+    
+    <div id="game-container">
+        <div id="target"></div>
+        <div id="level-indicator" class="level-indicator"></div>
+    </div>
+    
+    <div id="start-screen">
+        <h1 class="screen-title">注意力训练游戏</h1>
+        <p>快速点击出现的目标，提高你的反应速度和注意力</p>
         
-        <div class="game-play">
-            <div class="stats">
-                <div>得分: <span id="score">0</span></div>
-                <div>时间: <span id="timer">60</span>秒</div>
-            </div>
-            
-            <div class="countdown" id="countdown"></div>
-            
-            <div class="problem" id="problem">准备开始...</div>
-            
-            <input type="number" class="answer-input" id="answer" placeholder="输入答案" autocomplete="off">
-            
-            <div class="result" id="result"></div>
-            
-            <div class="buttons">
-                <button id="start-btn">开始游戏</button>
-                <button id="submit-btn" disabled>提交</button>
-                <button id="next-btn" disabled>下一题</button>
-            </div>
-            
-            <div class="settings">
-                <h3>游戏设置</h3>
-                <div class="setting-group">
-                    <label class="setting-label">难度级别:</label>
-                    <select id="difficulty">
-                        <option value="easy">简单 (个位数)</option>
-                        <option value="medium" selected>中等 (两位数)</option>
-                        <option value="hard">困难 (三位数)</option>
-                    </select>
-                </div>
-                
-                <div class="setting-group">
-                    <label class="setting-label">运算类型:</label>
-                    <select id="operation-type">
-                        <option value="addition" selected>加法</option>
-                        <option value="subtraction">减法</option>
-                        <option value="multiplication">乘法</option>
-                        <option value="division">除法</option>
-                        <option value="mixed">混合运算</option>
-                    </select>
-                </div>
-                
-                <div class="setting-group">
-                    <label class="setting-label">游戏时长:</label>
-                    <select id="game-duration">
-                        <option value="30">30秒</option>
-                        <option value="60" selected>60秒</option>
-                        <option value="120">120秒</option>
-                        <option value="300">5分钟</option>
-                    </select>
-                </div>
-            </div>
+        <div id="difficulty-selector">
+            <label for="difficulty">选择难度:</label>
+            <select id="difficulty">
+                <option value="easy">简单</option>
+                <option value="medium" selected>中等</option>
+                <option value="hard">困难</option>
+                <option value="expert">专家</option>
+            </select>
         </div>
         
-        <div class="game-over" id="game-over">
-            <h2>游戏结束!</h2>
-            <div class="summary" id="summary">
-                <table>
-                    <tr>
-                        <th>总题数</th>
-                        <th>正确数</th>
-                        <th>错误数</th>
-                        <th>正确率</th>
-                        <th>平均用时</th>
-                    </tr>
-                    <tr>
-                        <td id="total-problems">0</td>
-                        <td id="correct-problems">0</td>
-                        <td id="wrong-problems">0</td>
-                        <td id="accuracy">0%</td>
-                        <td id="avg-time">0秒</td>
-                    </tr>
-                </table>
-            </div>
-            <button id="play-again-btn">再玩一次</button>
+        <button id="start-button" class="game-btn">开始游戏</button>
+    </div>
+    
+    <div id="end-screen">
+        <h1 class="screen-title">游戏结束!</h1>
+        <div id="results">
+            <div class="result-item">总得分: <span id="final-score">0</span></div>
+            <div class="result-item">命中率: <span id="accuracy">0%</span></div>
+            <div class="result-item">平均反应时间: <span id="avg-reaction-time">0</span> 毫秒</div>
         </div>
+        <button id="restart-button" class="game-btn">再玩一次</button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 获取DOM元素
-            const problemElement = document.getElementById('problem');
-            const answerInput = document.getElementById('answer');
-            const resultElement = document.getElementById('result');
-            const scoreElement = document.getElementById('score');
-            const timerElement = document.getElementById('timer');
-            const countdownElement = document.getElementById('countdown');
-            const startButton = document.getElementById('start-btn');
-            const submitButton = document.getElementById('submit-btn');
-            const nextButton = document.getElementById('next-btn');
-            const difficultySelect = document.getElementById('difficulty');
-            const operationTypeSelect = document.getElementById('operation-type');
-            const gameDurationSelect = document.getElementById('game-duration');
-            const gamePlayDiv = document.querySelector('.game-play');
-            const gameOverDiv = document.getElementById('game-over');
-            const playAgainButton = document.getElementById('play-again-btn');
-            const totalProblemsElement = document.getElementById('total-problems');
-            const correctProblemsElement = document.getElementById('correct-problems');
-            const wrongProblemsElement = document.getElementById('wrong-problems');
-            const accuracyElement = document.getElementById('accuracy');
-            const avgTimeElement = document.getElementById('avg-time');
+        // 游戏配置和变量
+        const gameConfig = {
+            easy: { targetCount: 20, gameTime: 40, targetSizeRange: [60, 80], targetSpeedRange: [800, 1500] },
+            medium: { targetCount: 30, gameTime: 30, targetSizeRange: [40, 60], targetSpeedRange: [600, 1200] },
+            hard: { targetCount: 40, gameTime: 25, targetSizeRange: [30, 50], targetSpeedRange: [400, 900] },
+            expert: { targetCount: 50, gameTime: 20, targetSizeRange: [20, 40], targetSpeedRange: [250, 700] }
+        };
+        
+        let gameState = {
+            isRunning: false,
+            score: 0,
+            targetsHit: 0,
+            missedClicks: 0,
+            remainingTime: 0,
+            targetCount: 0,
+            difficulty: 'medium',
+            reactionTimes: [],
+            lastTargetTime: 0
+        };
+        
+        // DOM 元素
+        const target = document.getElementById('target');
+        const scoreDisplay = document.getElementById('score');
+        const targetsHitDisplay = document.getElementById('targets-hit');
+        const timerDisplay = document.getElementById('timer');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const difficultySelector = document.getElementById('difficulty');
+        const gameContainer = document.getElementById('game-container');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const accuracyDisplay = document.getElementById('accuracy');
+        const avgReactionTimeDisplay = document.getElementById('avg-reaction-time');
+        const levelIndicator = document.getElementById('level-indicator');
+        
+        // 颜色数组
+        const targetColors = [
+            '#ff4757', '#ff6b81', '#ff7f50', '#ff6348', 
+            '#2ed573', '#7bed9f', '#70a1ff', '#1e90ff',
+            '#5352ed', '#8c7ae6', '#ffa502', '#eccc68'
+        ];
+        
+        // 游戏初始化
+        function initGame() {
+            gameState.difficulty = difficultySelector.value;
+            const config = gameConfig[gameState.difficulty];
             
-            // 游戏状态变量
-            let currentProblem = {};
-            let score = 0;
-            let timeLeft = 60;
-            let gameTimer;
-            let isGameRunning = false;
-            let problemStartTime;
-            let gameStats = {
-                totalProblems: 0,
-                correctProblems: 0,
-                wrongProblems: 0,
-                totalTime: 0
-            };
+            gameState.isRunning = true;
+            gameState.score = 0;
+            gameState.targetsHit = 0;
+            gameState.missedClicks = 0;
+            gameState.remainingTime = config.gameTime;
+            gameState.targetCount = config.targetCount;
+            gameState.reactionTimes = [];
             
-            // 生成不同难度的随机数
-            function generateRandomNumber(difficulty) {
-                switch(difficulty) {
-                    case 'easy':
-                        return Math.floor(Math.random() * 9) + 1; // 1-9
-                    case 'medium':
-                        return Math.floor(Math.random() * 90) + 10; // 10-99
-                    case 'hard':
-                        return Math.floor(Math.random() * 900) + 100; // 100-999
-                    default:
-                        return Math.floor(Math.random() * 90) + 10; // 默认中等难度
-                }
-            }
+            scoreDisplay.textContent = '0';
+            targetsHitDisplay.textContent = `0/${config.targetCount}`;
+            timerDisplay.textContent = `${config.gameTime}s`;
             
-            // 生成新的计算题
-            function generateProblem() {
-                const difficulty = difficultySelect.value;
-                const operationType = operationTypeSelect.value;
-                
-                let num1, num2, operation, answer;
-                
-                // 根据选择的运算类型生成问题
-                if (operationType === 'mixed') {
-                    // 混合运算随机选择一种
-                    const operations = ['addition', 'subtraction', 'multiplication', 'division'];
-                    operation = operations[Math.floor(Math.random() * operations.length)];
-                } else {
-                    operation = operationType;
-                }
-                
-                switch(operation) {
-                    case 'addition':
-                        num1 = generateRandomNumber(difficulty);
-                        num2 = generateRandomNumber(difficulty);
-                        answer = num1 + num2;
-                        currentProblem = {
-                            text: `${num1} + ${num2} = ?`,
-                            answer: answer
-                        };
-                        break;
-                    case 'subtraction':
-                        num1 = generateRandomNumber(difficulty);
-                        // 确保结果为正数
-                        if (difficulty === 'easy') {
-                            num2 = Math.floor(Math.random() * num1) + 1;
-                        } else if (difficulty === 'medium') {
-                            num2 = Math.floor(Math.random() * Math.min(num1, 99)) + 1;
-                        } else {
-                            num2 = Math.floor(Math.random() * Math.min(num1, 999)) + 1;
-                        }
-                        answer = num1 - num2;
-                        currentProblem = {
-                            text: `${num1} - ${num2} = ?`,
-                            answer: answer
-                        };
-                        break;
-                    case 'multiplication':
-                        // 乘法难度调整
-                        if (difficulty === 'easy') {
-                            num1 = Math.floor(Math.random() * 9) + 1; // 1-9
-                            num2 = Math.floor(Math.random() * 9) + 1; // 1-9
-                        } else if (difficulty === 'medium') {
-                            num1 = Math.floor(Math.random() * 12) + 1; // 1-12
-                            num2 = Math.floor(Math.random() * 9) + 1; // 1-9
-                        } else {
-                            num1 = Math.floor(Math.random() * 20) + 5; // 5-24
-                            num2 = Math.floor(Math.random() * 15) + 5; // 5-19
-                        }
-                        answer = num1 * num2;
-                        currentProblem = {
-                            text: `${num1} × ${num2} = ?`,
-                            answer: answer
-                        };
-                        break;
-                    case 'division':
-                        // 先确定答案和除数，然后计算被除数，确保整除
-                        if (difficulty === 'easy') {
-                            answer = Math.floor(Math.random() * 9) + 1; // 1-9
-                            num2 = Math.floor(Math.random() * 9) + 1; // 1-9
-                        } else if (difficulty === 'medium') {
-                            answer = Math.floor(Math.random() * 20) + 1; // 1-20
-                            num2 = Math.floor(Math.random() * 9) + 1; // 1-9
-                        } else {
-                            answer = Math.floor(Math.random() * 50) + 1; // 1-50
-                            num2 = Math.floor(Math.random() * 20) + 1; // 1-20
-                        }
-                        num1 = answer * num2; // 确保能整除
-                        currentProblem = {
-                            text: `${num1} ÷ ${num2} = ?`,
-                            answer: answer
-                        };
-                        break;
-                }
-                
-                problemElement.textContent = currentProblem.text;
-                answerInput.value = '';
-                resultElement.textContent = '';
-                resultElement.className = 'result';
-                
-                // 记录问题开始时间
-                problemStartTime = Date.now();
-                
-                // 启用提交按钮，禁用下一题按钮
-                submitButton.disabled = false;
-                nextButton.disabled = true;
-                
-                // 自动聚焦到输入框
-                answerInput.focus();
-            }
+            startScreen.style.display = 'none';
+            levelIndicator.textContent = `难度: ${getDifficultyName(gameState.difficulty)}`;
             
-            // 检查答案
-            function checkAnswer() {
-                if (!isGameRunning) return;
+            // 游戏倒计时
+            const timer = setInterval(() => {
+                gameState.remainingTime--;
+                timerDisplay.textContent = `${gameState.remainingTime}s`;
                 
-                const userAnswer = parseInt(answerInput.value);
-                if (isNaN(userAnswer)) {
-                    resultElement.textContent = '请输入有效数字';
-                    resultElement.className = 'result incorrect';
-                    return;
-                }
-                
-                // 计算此题用时
-                const problemTime = (Date.now() - problemStartTime) / 1000;
-                gameStats.totalTime += problemTime;
-                gameStats.totalProblems++;
-                
-                if (userAnswer === currentProblem.answer) {
-                    resultElement.textContent = '正确!';
-                    resultElement.className = 'result correct';
-                    score += 10;
-                    scoreElement.textContent = score;
-                    gameStats.correctProblems++;
-                } else {
-                    resultElement.textContent = `错误! 正确答案是 ${currentProblem.answer}`;
-                    resultElement.className = 'result incorrect';
-                    gameStats.wrongProblems++;
-                }
-                
-                // 禁用提交按钮，启用下一题按钮
-                submitButton.disabled = true;
-                nextButton.disabled = false;
-                nextButton.focus();
-            }
-            
-            // 更新计时器
-            function updateTimer() {
-                timeLeft--;
-                timerElement.textContent = timeLeft;
-                
-                if (timeLeft <= 0) {
+                if (gameState.remainingTime <= 0 || gameState.targetsHit >= gameState.targetCount) {
+                    clearInterval(timer);
                     endGame();
                 }
+            }, 1000);
+            
+            // 游戏开始时显示第一个目标
+            showTarget();
+            
+            // 监听游戏区域的点击事件（错过目标时）
+            gameContainer.addEventListener('click', handleMissedClick);
+        }
+        
+        // 获取难度名称的中文显示
+        function getDifficultyName(difficulty) {
+            const names = {
+                'easy': '简单',
+                'medium': '中等',
+                'hard': '困难',
+                'expert': '专家'
+            };
+            return names[difficulty] || difficulty;
+        }
+        
+        // 显示目标
+        function showTarget() {
+            if (!gameState.isRunning) return;
+            
+            const config = gameConfig[gameState.difficulty];
+            
+            // 随机位置
+            const containerWidth = gameContainer.clientWidth;
+            const containerHeight = gameContainer.clientHeight;
+            
+            // 随机大小（基于难度）
+            const size = getRandomInt(config.targetSizeRange[0], config.targetSizeRange[1]);
+            
+            // 确保目标完全在容器内
+            const maxLeft = containerWidth - size;
+            const maxTop = containerHeight - size;
+            
+            const left = getRandomInt(0, maxLeft);
+            const top = getRandomInt(0, maxTop);
+            
+            // 随机颜色
+            const colorIndex = getRandomInt(0, targetColors.length - 1);
+            
+            // 设置目标样式
+            target.style.width = `${size}px`;
+            target.style.height = `${size}px`;
+            target.style.left = `${left}px`;
+            target.style.top = `${top}px`;
+            target.style.backgroundColor = targetColors[colorIndex];
+            target.style.display = 'block';
+            
+            // 记录目标出现的时间
+            gameState.lastTargetTime = Date.now();
+        }
+        
+        // 处理点击目标
+        function handleTargetClick() {
+            if (!gameState.isRunning) return;
+            
+            // 计算反应时间
+            const reactionTime = Date.now() - gameState.lastTargetTime;
+            gameState.reactionTimes.push(reactionTime);
+            
+            // 隐藏目标
+            target.style.display = 'none';
+            
+            // 更新计分
+            gameState.targetsHit++;
+            // 反应时间越短，得分越高
+            const baseScore = 100;
+            const timeBonus = Math.max(0, 500 - reactionTime); // 最高时间奖励500ms
+            const scoreGain = Math.floor(baseScore + (timeBonus / 2));
+            
+            gameState.score += scoreGain;
+            
+            // 更新UI
+            scoreDisplay.textContent = gameState.score;
+            targetsHitDisplay.textContent = `${gameState.targetsHit}/${gameState.targetCount}`;
+            
+            // 显示得分动画
+            showScoreAnimation(scoreGain);
+            
+            // 检查是否达到目标数量
+            if (gameState.targetsHit >= gameState.targetCount) {
+                endGame();
+                return;
             }
             
-            // 结束游戏
-            function endGame() {
-                clearInterval(gameTimer);
-                isGameRunning = false;
-                
-                // 禁用所有游戏按钮
-                submitButton.disabled = true;
-                nextButton.disabled = true;
-                
-                // 显示游戏结果
-                gamePlayDiv.style.display = 'none';
-                gameOverDiv.style.display = 'flex';
-                
-                // 更新统计信息
-                totalProblemsElement.textContent = gameStats.totalProblems;
-                correctProblemsElement.textContent = gameStats.correctProblems;
-                wrongProblemsElement.textContent = gameStats.wrongProblems;
-                
-                const accuracy = gameStats.totalProblems > 0 
-                    ? ((gameStats.correctProblems / gameStats.totalProblems) * 100).toFixed(1) 
-                    : '0.0';
-                accuracyElement.textContent = `${accuracy}%`;
-                
-                const avgTime = gameStats.totalProblems > 0 
-                    ? (gameStats.totalTime / gameStats.totalProblems).toFixed(1) 
-                    : '0.0';
-                avgTimeElement.textContent = `${avgTime}秒`;
+            // 短暂延迟后显示下一个目标
+            const config = gameConfig[gameState.difficulty];
+            const delay = getRandomInt(config.targetSpeedRange[0], config.targetSpeedRange[1]);
+            setTimeout(showTarget, delay);
+        }
+        
+        // 处理错过目标的点击
+        function handleMissedClick(event) {
+            // 确保点击事件不是来自目标本身
+            if (event.target !== target && gameState.isRunning && target.style.display !== 'none') {
+                gameState.missedClicks++;
+            }
+        }
+        
+        // 显示得分动画
+        function showScoreAnimation(points) {
+            const scoreAnim = document.createElement('div');
+            scoreAnim.textContent = `+${points}`;
+            scoreAnim.style.position = 'absolute';
+            scoreAnim.style.left = `${target.offsetLeft + target.offsetWidth / 2}px`;
+            scoreAnim.style.top = `${target.offsetTop}px`;
+            scoreAnim.style.color = '#2ed573';
+            scoreAnim.style.fontWeight = 'bold';
+            scoreAnim.style.fontSize = '18px';
+            scoreAnim.style.transition = 'all 1s ease-out';
+            scoreAnim.style.opacity = '1';
+            scoreAnim.style.zIndex = '5';
+            gameContainer.appendChild(scoreAnim);
+            
+            setTimeout(() => {
+                scoreAnim.style.opacity = '0';
+                scoreAnim.style.transform = 'translateY(-30px)';
+            }, 50);
+            
+            setTimeout(() => {
+                gameContainer.removeChild(scoreAnim);
+            }, 1000);
+        }
+        
+        // 结束游戏
+        function endGame() {
+            gameState.isRunning = false;
+            target.style.display = 'none';
+            gameContainer.removeEventListener('click', handleMissedClick);
+            
+            // 计算最终统计数据
+            const totalClicks = gameState.targetsHit + gameState.missedClicks;
+            const accuracy = totalClicks > 0 ? Math.round((gameState.targetsHit / totalClicks) * 100) : 0;
+            
+            let avgReactionTime = 0;
+            if (gameState.reactionTimes.length > 0) {
+                const sum = gameState.reactionTimes.reduce((a, b) => a + b, 0);
+                avgReactionTime = Math.round(sum / gameState.reactionTimes.length);
             }
             
-            // 开始游戏倒计时
-            function startCountdown() {
-                let count = 3;
-                countdownElement.textContent = count;
-                
-                const countdownTimer = setInterval(() => {
-                    count--;
-                    
-                    if (count > 0) {
-                        countdownElement.textContent = count;
-                    } else {
-                        countdownElement.textContent = '开始!';
-                        clearInterval(countdownTimer);
-                        
-                        // 启动游戏
-                        setTimeout(() => {
-                            countdownElement.textContent = '';
-                            startGame();
-                        }, 1000);
-                    }
-                }, 1000);
-            }
+            // 更新结果显示
+            finalScoreDisplay.textContent = gameState.score;
+            accuracyDisplay.textContent = `${accuracy}%`;
+            avgReactionTimeDisplay.textContent = avgReactionTime;
             
-            // 开始游戏
-            function startGame() {
-                // 重置游戏状态
-                score = 0;
-                scoreElement.textContent = score;
-                timeLeft = parseInt(gameDurationSelect.value);
-                timerElement.textContent = timeLeft;
+            // 显示结束屏幕
+            endScreen.style.display = 'flex';
+        }
+        
+        // 获取指定范围内的随机整数
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        
+        // 事件监听器
+        target.addEventListener('click', handleTargetClick);
+        startButton.addEventListener('click', initGame);
+        restartButton.addEventListener('click', () => {
+            endScreen.style.display = 'none';
+            initGame();
+        });
+        
+        // 窗口大小调整时重新定位目标
+        window.addEventListener('resize', () => {
+            if (gameState.isRunning && target.style.display !== 'none') {
+                // 确保目标在可视区域内
+                const containerWidth = gameContainer.clientWidth;
+                const containerHeight = gameContainer.clientHeight;
+                const targetWidth = parseInt(target.style.width);
+                const targetHeight = parseInt(target.style.height);
                 
-                gameStats = {
-                    totalProblems: 0,
-                    correctProblems: 0,
-                    wrongProblems: 0,
-                    totalTime: 0
-                };
+                let left = parseInt(target.style.left);
+                let top = parseInt(target.style.top);
                 
-                // 禁用设置
-                difficultySelect.disabled = true;
-                operationTypeSelect.disabled = true;
-                gameDurationSelect.disabled = true;
-                startButton.disabled = true;
-                
-                // 启动游戏计时器
-                isGameRunning = true;
-                gameTimer = setInterval(updateTimer, 1000);
-                
-                // 生成第一个问题
-                generateProblem();
-            }
-            
-            // 事件监听器
-            startButton.addEventListener('click', function() {
-                startCountdown();
-            });
-            
-            submitButton.addEventListener('click', checkAnswer);
-            
-            // 按回车键提交答案
-            answerInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter' && !submitButton.disabled) {
-                    checkAnswer();
+                if (left + targetWidth > containerWidth) {
+                    left = containerWidth - targetWidth;
                 }
-            });
-            
-            nextButton.addEventListener('click', generateProblem);
-            
-            playAgainButton.addEventListener('click', function() {
-                // 重置UI
-                gameOverDiv.style.display = 'none';
-                gamePlayDiv.style.display = 'block';
                 
-                // 启用设置
-                difficultySelect.disabled = false;
-                operationTypeSelect.disabled = false;
-                gameDurationSelect.disabled = false;
-                startButton.disabled = false;
+                if (top + targetHeight > containerHeight) {
+                    top = containerHeight - targetHeight;
+                }
                 
-                problemElement.textContent = '准备开始...';
-                resultElement.textContent = '';
-                answerInput.value = '';
-            });
+                target.style.left = `${left}px`;
+                target.style.top = `${top}px`;
+            }
         });
     </script>
 </body>
