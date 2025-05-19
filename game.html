@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attention Trainer Game</title>
+    <title>听觉序列重现游戏</title>
     <style>
         * {
             margin: 0;
@@ -12,446 +12,447 @@
         }
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: white;
-            width: 100vw;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
         }
         
-        #game-container {
-            position: relative;
-            flex-grow: 1;
-            background-color: white;
-        }
-        
-        #target {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ff4757;
-            cursor: pointer;
-            display: none;
-            transition: transform 0.1s;
-        }
-        
-        #target:active {
-            transform: scale(0.9);
-        }
-        
-        #ui-container {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background-color: #f1f2f6;
-        }
-        
-        .info-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .info-label {
-            font-size: 14px;
-            color: #2f3542;
-        }
-        
-        .info-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1e90ff;
-        }
-        
-        #start-screen, #end-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .game-container {
             width: 100%;
-            height: 100%;
+            max-width: 800px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.9);
-            z-index: 10;
+            gap: 20px;
         }
         
-        #end-screen {
-            display: none;
-        }
-        
-        .screen-title {
-            font-size: 36px;
+        .header {
+            text-align: center;
             margin-bottom: 20px;
-            color: #2f3542;
         }
         
-        .game-btn {
-            padding: 12px 30px;
-            font-size: 18px;
-            background-color: #1e90ff;
-            color: white;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .info-panel {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            font-size: 1.2rem;
+        }
+        
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .sound-button {
+            aspect-ratio: 1;
+            border-radius: 50%;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.1s ease-in-out, opacity 0.2s ease;
+            font-size: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .game-btn:hover {
-            background-color: #147bcd;
+        .sound-button:active {
+            transform: scale(0.95);
         }
         
-        #results {
-            margin: 20px 0;
-            font-size: 18px;
-        }
-        
-        .result-item {
-            margin: 5px 0;
-        }
-        
-        #difficulty-selector {
-            margin-top: 20px;
+        .control-panel {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
         }
         
-        #difficulty-selector select {
-            padding: 8px;
-            font-size: 16px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .level-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.6);
+        .control-button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #3498db;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .control-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .control-button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            font-size: 1.5rem;
+            height: 2rem;
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .glow {
+            animation: glow-animation 0.5s;
+        }
+        
+        @keyframes glow-animation {
+            0% { opacity: 1; box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+            50% { opacity: 0.8; box-shadow: 0 0 20px rgba(255, 255, 255, 1); }
+            100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .info-panel {
+                font-size: 1rem;
+            }
+            
+            .buttons-container {
+                gap: 10px;
+            }
+            
+            .sound-button {
+                font-size: 1.2rem;
+            }
+            
+            .control-button {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+            
+            .message {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="ui-container">
-        <div class="info-box">
-            <span class="info-label">时间</span>
-            <span id="timer" class="info-value">30s</span>
-        </div>
-        <div class="info-box">
-            <span class="info-label">得分</span>
-            <span id="score" class="info-value">0</span>
-        </div>
-        <div class="info-box">
-            <span class="info-label">目标</span>
-            <span id="targets-hit" class="info-value">0/30</span>
-        </div>
-    </div>
-    
-    <div id="game-container">
-        <div id="target"></div>
-        <div id="level-indicator" class="level-indicator"></div>
-    </div>
-    
-    <div id="start-screen">
-        <h1 class="screen-title">注意力训练游戏</h1>
-        <p>快速点击出现的目标，提高你的反应速度和注意力</p>
-        
-        <div id="difficulty-selector">
-            <label for="difficulty">选择难度:</label>
-            <select id="difficulty">
-                <option value="easy">简单</option>
-                <option value="medium" selected>中等</option>
-                <option value="hard">困难</option>
-                <option value="expert">专家</option>
-            </select>
+    <div class="game-container">
+        <div class="header">
+            <h1>听觉序列重现游戏</h1>
         </div>
         
-        <button id="start-button" class="game-btn">开始游戏</button>
-    </div>
-    
-    <div id="end-screen">
-        <h1 class="screen-title">游戏结束!</h1>
-        <div id="results">
-            <div class="result-item">总得分: <span id="final-score">0</span></div>
-            <div class="result-item">命中率: <span id="accuracy">0%</span></div>
-            <div class="result-item">平均反应时间: <span id="avg-reaction-time">0</span> 毫秒</div>
+        <div class="info-panel">
+            <div>关卡: <span id="level">1</span></div>
+            <div>分数: <span id="score">0</span></div>
         </div>
-        <button id="restart-button" class="game-btn">再玩一次</button>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="message" id="message">准备好开始游戏！</div>
+        
+        <div class="buttons-container" id="buttonsContainer">
+            <!-- 音符按钮将由JS动态生成 -->
+        </div>
+        
+        <div class="control-panel">
+            <button class="control-button" id="startButton">开始游戏</button>
+            <button class="control-button" id="listenAgainButton" disabled>再听一次</button>
+        </div>
     </div>
 
     <script>
-        // 游戏配置和变量
-        const gameConfig = {
-            easy: { targetCount: 20, gameTime: 40, targetSizeRange: [60, 80], targetSpeedRange: [800, 1500] },
-            medium: { targetCount: 30, gameTime: 30, targetSizeRange: [40, 60], targetSpeedRange: [600, 1200] },
-            hard: { targetCount: 40, gameTime: 25, targetSizeRange: [30, 50], targetSpeedRange: [400, 900] },
-            expert: { targetCount: 50, gameTime: 20, targetSizeRange: [20, 40], targetSpeedRange: [250, 700] }
-        };
-        
-        let gameState = {
-            isRunning: false,
-            score: 0,
-            targetsHit: 0,
-            missedClicks: 0,
-            remainingTime: 0,
-            targetCount: 0,
-            difficulty: 'medium',
-            reactionTimes: [],
-            lastTargetTime: 0
-        };
-        
-        // DOM 元素
-        const target = document.getElementById('target');
-        const scoreDisplay = document.getElementById('score');
-        const targetsHitDisplay = document.getElementById('targets-hit');
-        const timerDisplay = document.getElementById('timer');
-        const startScreen = document.getElementById('start-screen');
-        const endScreen = document.getElementById('end-screen');
-        const startButton = document.getElementById('start-button');
-        const restartButton = document.getElementById('restart-button');
-        const difficultySelector = document.getElementById('difficulty');
-        const gameContainer = document.getElementById('game-container');
-        const finalScoreDisplay = document.getElementById('final-score');
-        const accuracyDisplay = document.getElementById('accuracy');
-        const avgReactionTimeDisplay = document.getElementById('avg-reaction-time');
-        const levelIndicator = document.getElementById('level-indicator');
-        
-        // 颜色数组
-        const targetColors = [
-            '#ff4757', '#ff6b81', '#ff7f50', '#ff6348', 
-            '#2ed573', '#7bed9f', '#70a1ff', '#1e90ff',
-            '#5352ed', '#8c7ae6', '#ffa502', '#eccc68'
-        ];
-        
-        // 游戏初始化
-        function initGame() {
-            gameState.difficulty = difficultySelector.value;
-            const config = gameConfig[gameState.difficulty];
-            
-            gameState.isRunning = true;
-            gameState.score = 0;
-            gameState.targetsHit = 0;
-            gameState.missedClicks = 0;
-            gameState.remainingTime = config.gameTime;
-            gameState.targetCount = config.targetCount;
-            gameState.reactionTimes = [];
-            
-            scoreDisplay.textContent = '0';
-            targetsHitDisplay.textContent = `0/${config.targetCount}`;
-            timerDisplay.textContent = `${config.gameTime}s`;
-            
-            startScreen.style.display = 'none';
-            levelIndicator.textContent = `难度: ${getDifficultyName(gameState.difficulty)}`;
-            
-            // 游戏倒计时
-            const timer = setInterval(() => {
-                gameState.remainingTime--;
-                timerDisplay.textContent = `${gameState.remainingTime}s`;
-                
-                if (gameState.remainingTime <= 0 || gameState.targetsHit >= gameState.targetCount) {
-                    clearInterval(timer);
-                    endGame();
-                }
-            }, 1000);
-            
-            // 游戏开始时显示第一个目标
-            showTarget();
-            
-            // 监听游戏区域的点击事件（错过目标时）
-            gameContainer.addEventListener('click', handleMissedClick);
-        }
-        
-        // 获取难度名称的中文显示
-        function getDifficultyName(difficulty) {
-            const names = {
-                'easy': '简单',
-                'medium': '中等',
-                'hard': '困难',
-                'expert': '专家'
+        document.addEventListener('DOMContentLoaded', () => {
+            // 游戏状态变量
+            const gameState = {
+                level: 1,
+                score: 0,
+                currentSequence: [],
+                playerSequence: [],
+                isPlaying: false,
+                canInput: false,
+                maxListenAgain: 2,
+                listenAgainCount: 0,
+                noteCount: 6, // 初始音符数量
+                buttonColors: [
+                    '#e74c3c', '#3498db', '#2ecc71', 
+                    '#f39c12', '#9b59b6', '#1abc9c'
+                ]
             };
-            return names[difficulty] || difficulty;
-        }
-        
-        // 显示目标
-        function showTarget() {
-            if (!gameState.isRunning) return;
+
+            // DOM元素
+            const elements = {
+                level: document.getElementById('level'),
+                score: document.getElementById('score'),
+                message: document.getElementById('message'),
+                progressBar: document.getElementById('progressBar'),
+                buttonsContainer: document.getElementById('buttonsContainer'),
+                startButton: document.getElementById('startButton'),
+                listenAgainButton: document.getElementById('listenAgainButton')
+            };
+
+            // 音频上下文
+            let audioContext;
             
-            const config = gameConfig[gameState.difficulty];
-            
-            // 随机位置
-            const containerWidth = gameContainer.clientWidth;
-            const containerHeight = gameContainer.clientHeight;
-            
-            // 随机大小（基于难度）
-            const size = getRandomInt(config.targetSizeRange[0], config.targetSizeRange[1]);
-            
-            // 确保目标完全在容器内
-            const maxLeft = containerWidth - size;
-            const maxTop = containerHeight - size;
-            
-            const left = getRandomInt(0, maxLeft);
-            const top = getRandomInt(0, maxTop);
-            
-            // 随机颜色
-            const colorIndex = getRandomInt(0, targetColors.length - 1);
-            
-            // 设置目标样式
-            target.style.width = `${size}px`;
-            target.style.height = `${size}px`;
-            target.style.left = `${left}px`;
-            target.style.top = `${top}px`;
-            target.style.backgroundColor = targetColors[colorIndex];
-            target.style.display = 'block';
-            
-            // 记录目标出现的时间
-            gameState.lastTargetTime = Date.now();
-        }
-        
-        // 处理点击目标
-        function handleTargetClick() {
-            if (!gameState.isRunning) return;
-            
-            // 计算反应时间
-            const reactionTime = Date.now() - gameState.lastTargetTime;
-            gameState.reactionTimes.push(reactionTime);
-            
-            // 隐藏目标
-            target.style.display = 'none';
-            
-            // 更新计分
-            gameState.targetsHit++;
-            // 反应时间越短，得分越高
-            const baseScore = 100;
-            const timeBonus = Math.max(0, 500 - reactionTime); // 最高时间奖励500ms
-            const scoreGain = Math.floor(baseScore + (timeBonus / 2));
-            
-            gameState.score += scoreGain;
-            
-            // 更新UI
-            scoreDisplay.textContent = gameState.score;
-            targetsHitDisplay.textContent = `${gameState.targetsHit}/${gameState.targetCount}`;
-            
-            // 显示得分动画
-            showScoreAnimation(scoreGain);
-            
-            // 检查是否达到目标数量
-            if (gameState.targetsHit >= gameState.targetCount) {
-                endGame();
-                return;
+            // 初始化音频上下文
+            function initAudio() {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            
-            // 短暂延迟后显示下一个目标
-            const config = gameConfig[gameState.difficulty];
-            const delay = getRandomInt(config.targetSpeedRange[0], config.targetSpeedRange[1]);
-            setTimeout(showTarget, delay);
-        }
-        
-        // 处理错过目标的点击
-        function handleMissedClick(event) {
-            // 确保点击事件不是来自目标本身
-            if (event.target !== target && gameState.isRunning && target.style.display !== 'none') {
-                gameState.missedClicks++;
-            }
-        }
-        
-        // 显示得分动画
-        function showScoreAnimation(points) {
-            const scoreAnim = document.createElement('div');
-            scoreAnim.textContent = `+${points}`;
-            scoreAnim.style.position = 'absolute';
-            scoreAnim.style.left = `${target.offsetLeft + target.offsetWidth / 2}px`;
-            scoreAnim.style.top = `${target.offsetTop}px`;
-            scoreAnim.style.color = '#2ed573';
-            scoreAnim.style.fontWeight = 'bold';
-            scoreAnim.style.fontSize = '18px';
-            scoreAnim.style.transition = 'all 1s ease-out';
-            scoreAnim.style.opacity = '1';
-            scoreAnim.style.zIndex = '5';
-            gameContainer.appendChild(scoreAnim);
-            
-            setTimeout(() => {
-                scoreAnim.style.opacity = '0';
-                scoreAnim.style.transform = 'translateY(-30px)';
-            }, 50);
-            
-            setTimeout(() => {
-                gameContainer.removeChild(scoreAnim);
-            }, 1000);
-        }
-        
-        // 结束游戏
-        function endGame() {
-            gameState.isRunning = false;
-            target.style.display = 'none';
-            gameContainer.removeEventListener('click', handleMissedClick);
-            
-            // 计算最终统计数据
-            const totalClicks = gameState.targetsHit + gameState.missedClicks;
-            const accuracy = totalClicks > 0 ? Math.round((gameState.targetsHit / totalClicks) * 100) : 0;
-            
-            let avgReactionTime = 0;
-            if (gameState.reactionTimes.length > 0) {
-                const sum = gameState.reactionTimes.reduce((a, b) => a + b, 0);
-                avgReactionTime = Math.round(sum / gameState.reactionTimes.length);
-            }
-            
-            // 更新结果显示
-            finalScoreDisplay.textContent = gameState.score;
-            accuracyDisplay.textContent = `${accuracy}%`;
-            avgReactionTimeDisplay.textContent = avgReactionTime;
-            
-            // 显示结束屏幕
-            endScreen.style.display = 'flex';
-        }
-        
-        // 获取指定范围内的随机整数
-        function getRandomInt(min, max) {
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-        
-        // 事件监听器
-        target.addEventListener('click', handleTargetClick);
-        startButton.addEventListener('click', initGame);
-        restartButton.addEventListener('click', () => {
-            endScreen.style.display = 'none';
-            initGame();
-        });
-        
-        // 窗口大小调整时重新定位目标
-        window.addEventListener('resize', () => {
-            if (gameState.isRunning && target.style.display !== 'none') {
-                // 确保目标在可视区域内
-                const containerWidth = gameContainer.clientWidth;
-                const containerHeight = gameContainer.clientHeight;
-                const targetWidth = parseInt(target.style.width);
-                const targetHeight = parseInt(target.style.height);
+
+            // 创建音符按钮
+            function createButtons() {
+                elements.buttonsContainer.innerHTML = '';
                 
-                let left = parseInt(target.style.left);
-                let top = parseInt(target.style.top);
-                
-                if (left + targetWidth > containerWidth) {
-                    left = containerWidth - targetWidth;
+                for (let i = 0; i < gameState.noteCount; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'sound-button';
+                    button.style.backgroundColor = gameState.buttonColors[i % gameState.buttonColors.length];
+                    button.dataset.index = i;
+                    button.innerText = (i + 1).toString();
+                    
+                    button.addEventListener('click', () => {
+                        if (gameState.canInput) {
+                            playNote(i);
+                            checkInput(i);
+                        }
+                    });
+                    
+                    elements.buttonsContainer.appendChild(button);
+                }
+            }
+
+            // 播放单个音符
+            function playNote(index) {
+                if (!audioContext) {
+                    initAudio();
                 }
                 
-                if (top + targetHeight > containerHeight) {
-                    top = containerHeight - targetHeight;
+                const buttons = elements.buttonsContainer.querySelectorAll('.sound-button');
+                const button = buttons[index];
+                
+                // 视觉效果
+                button.classList.add('glow');
+                setTimeout(() => {
+                    button.classList.remove('glow');
+                }, 300);
+                
+                // 音频效果
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // 根据按钮索引设置不同频率（音高）和音色
+                const baseFrequency = 220;
+                const frequencies = [
+                    baseFrequency,
+                    baseFrequency * 9/8,  // D
+                    baseFrequency * 5/4,  // E
+                    baseFrequency * 4/3,  // F
+                    baseFrequency * 3/2,  // G
+                    baseFrequency * 5/3   // A
+                ];
+                
+                const waveTypes = ['sine', 'square', 'triangle', 'sawtooth'];
+                oscillator.type = waveTypes[index % waveTypes.length];
+                oscillator.frequency.value = frequencies[index % frequencies.length];
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+
+            // 播放整个序列
+            function playSequence() {
+                gameState.canInput = false;
+                elements.message.textContent = '请听...';
+                
+                // 禁用再听一次按钮，直到序列播放完毕
+                elements.listenAgainButton.disabled = true;
+                
+                let i = 0;
+                const interval = setInterval(() => {
+                    playNote(gameState.currentSequence[i]);
+                    i++;
+                    
+                    if (i >= gameState.currentSequence.length) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            elements.message.textContent = '请重现序列';
+                            gameState.canInput = true;
+                            elements.listenAgainButton.disabled = gameState.listenAgainCount >= gameState.maxListenAgain;
+                        }, 500);
+                    }
+                }, 600);
+            }
+
+            // 生成新的随机序列
+            function generateSequence() {
+                gameState.currentSequence = [];
+                
+                // 根据级别计算序列长度: 初始3个，每升2级增加1个
+                const sequenceLength = 3 + Math.floor((gameState.level - 1) / 2);
+                
+                for (let i = 0; i < sequenceLength; i++) {
+                    gameState.currentSequence.push(Math.floor(Math.random() * gameState.noteCount));
                 }
                 
-                target.style.left = `${left}px`;
-                target.style.top = `${top}px`;
+                return gameState.currentSequence;
             }
+
+            // 检查玩家输入
+            function checkInput(index) {
+                gameState.playerSequence.push(index);
+                const currentIndex = gameState.playerSequence.length - 1;
+                
+                // 更新进度条
+                elements.progressBar.style.width = `${(gameState.playerSequence.length / gameState.currentSequence.length) * 100}%`;
+                
+                // 检查是否匹配当前位置
+                if (gameState.playerSequence[currentIndex] !== gameState.currentSequence[currentIndex]) {
+                    gameOver();
+                    return;
+                }
+                
+                // 检查是否完成整个序列
+                if (gameState.playerSequence.length === gameState.currentSequence.length) {
+                    levelComplete();
+                }
+            }
+
+            // 关卡完成
+            function levelComplete() {
+                gameState.canInput = false;
+                gameState.score += gameState.level * 10;
+                elements.score.textContent = gameState.score;
+                
+                elements.message.textContent = '太棒了！准备进入下一关...';
+                elements.progressBar.style.width = '100%';
+                
+                setTimeout(() => {
+                    gameState.level++;
+                    gameState.listenAgainCount = 0;
+                    elements.level.textContent = gameState.level;
+                    
+                    // 每4关增加一个音符按钮，最多到9个
+                    if (gameState.level % 4 === 0 && gameState.noteCount < 9) {
+                        gameState.noteCount++;
+                        createButtons();
+                    }
+                    
+                    startLevel();
+                }, 1500);
+            }
+
+            // 游戏结束
+            function gameOver() {
+                gameState.canInput = false;
+                elements.message.textContent = '游戏结束！序列不匹配';
+                elements.progressBar.style.width = '0%';
+                elements.startButton.disabled = false;
+                elements.listenAgainButton.disabled = true;
+                
+                // 闪烁错误提示
+                const redFlash = () => {
+                    document.body.style.backgroundColor = '#ffdddd';
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = 'white';
+                    }, 200);
+                };
+                
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(redFlash, i * 300);
+                }
+                
+                gameState.isPlaying = false;
+                elements.startButton.textContent = '重新开始';
+            }
+
+            // 开始新关卡
+            function startLevel() {
+                gameState.playerSequence = [];
+                elements.progressBar.style.width = '0%';
+                
+                generateSequence();
+                
+                setTimeout(() => {
+                    playSequence();
+                }, 1000);
+            }
+
+            // 开始游戏
+            function startGame() {
+                if (!audioContext) {
+                    initAudio();
+                }
+                
+                gameState.level = 1;
+                gameState.score = 0;
+                gameState.isPlaying = true;
+                gameState.listenAgainCount = 0;
+                gameState.noteCount = 6; // 重置音符数量
+                
+                elements.level.textContent = gameState.level;
+                elements.score.textContent = gameState.score;
+                elements.startButton.disabled = true;
+                elements.message.textContent = '准备开始...';
+                
+                createButtons();
+                startLevel();
+            }
+
+            // 再听一次
+            function listenAgain() {
+                if (gameState.listenAgainCount < gameState.maxListenAgain) {
+                    gameState.listenAgainCount++;
+                    playSequence();
+                    
+                    if (gameState.listenAgainCount >= gameState.maxListenAgain) {
+                        elements.listenAgainButton.disabled = true;
+                    }
+                }
+            }
+
+            // 事件监听器
+            elements.startButton.addEventListener('click', startGame);
+            elements.listenAgainButton.addEventListener('click', listenAgain);
+
+            // 初始化按钮
+            createButtons();
         });
     </script>
 </body>
