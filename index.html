@@ -1,459 +1,311 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>听觉序列重现游戏</title>
+    <title>Attention Trainers - 音乐模仿游戏</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: white;
+            background-color: #f5f5f5;
             color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .game-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .game-intro h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+        
+        .game-intro p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
         }
         
         .game-container {
+            position: relative;
             width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .info-panel {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-            font-size: 1.2rem;
-        }
-        
-        .buttons-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .sound-button {
-            aspect-ratio: 1;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s ease-in-out, opacity 0.2s ease;
-            font-size: 1.5rem;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .sound-button:active {
-            transform: scale(0.95);
-        }
-        
-        .control-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .control-button {
-            padding: 12px 20px;
+            height: 0;
+            padding-bottom: 62.5%; /* 16:10宽高比 */
+            background-color: white;
             border-radius: 8px;
-            border: none;
-            background-color: #3498db;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        
-        .control-button:hover {
-            background-color: #2980b9;
-        }
-        
-        .control-button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        
-        .message {
-            font-size: 1.5rem;
-            height: 2rem;
-            text-align: center;
-            color: #2c3e50;
-            margin-top: 10px;
-        }
-        
-        .progress-container {
-            width: 100%;
-            height: 10px;
-            background-color: #ecf0f1;
-            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin-bottom: 2rem;
         }
         
-        .progress-bar {
+        .game-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            background-color: #2ecc71;
-            width: 0%;
-            transition: width 0.5s ease;
+            border: none;
         }
         
-        .glow {
-            animation: glow-animation 0.5s;
+        .fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
         }
         
-        @keyframes glow-animation {
-            0% { opacity: 1; box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
-            50% { opacity: 0.8; box-shadow: 0 0 20px rgba(255, 255, 255, 1); }
-            100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+        .fullscreen-button:hover {
+            background-color: rgba(76, 175, 80, 1);
         }
         
-        @media (max-width: 600px) {
-            h1 {
+        .fullscreen-icon {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .feature-icon {
+            background-color: #e8f5e9;
+            color: #4CAF50;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            font-size: 24px;
+        }
+        
+        .feature h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        footer p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
                 font-size: 1.5rem;
             }
             
-            .info-panel {
-                font-size: 1rem;
+            .game-intro h2 {
+                font-size: 1.5rem;
             }
             
-            .buttons-container {
-                gap: 10px;
-            }
-            
-            .sound-button {
-                font-size: 1.2rem;
-            }
-            
-            .control-button {
-                padding: 10px 15px;
-                font-size: 1rem;
-            }
-            
-            .message {
-                font-size: 1.2rem;
+            .game-container {
+                padding-bottom: 75%; /* 调整移动设备宽高比 */
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <h1>听觉序列重现游戏</h1>
+    <header>
+        <h1>Attention Trainers</h1>
+        <p>提升您的注意力和音乐能力</p>
+    </header>
+    
+    <main>
+        <section class="game-intro">
+            <h2>音乐模仿游戏</h2>
+            <p>挑战你的听力和注意力！聆听音乐节奏，然后精确地模仿出来。测试你的音乐记忆力和节奏感，看看你能获得多高的分数！</p>
+        </section>
+        
+        <div class="game-container">
+            <iframe id="game-iframe" class="game-iframe" src="game.html" title="音乐模仿游戏" allowfullscreen></iframe>
+            <button id="fullscreen-button" class="fullscreen-button">
+                <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>
+                全屏
+            </button>
         </div>
         
-        <div class="info-panel">
-            <div>关卡: <span id="level">1</span></div>
-            <div>分数: <span id="score">0</span></div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-        
-        <div class="message" id="message">准备好开始游戏！</div>
-        
-        <div class="buttons-container" id="buttonsContainer">
-            <!-- 音符按钮将由JS动态生成 -->
-        </div>
-        
-        <div class="control-panel">
-            <button class="control-button" id="startButton">开始游戏</button>
-            <button class="control-button" id="listenAgainButton" disabled>再听一次</button>
-        </div>
-    </div>
+        <section class="features">
+            <div class="feature">
+                <div class="feature-icon">🎵</div>
+                <h3>音乐节奏训练</h3>
+                <p>通过模仿各种复杂的音乐节奏，提高你的听力和节奏感。游戏会根据你的水平逐步增加难度。</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🧠</div>
+                <h3>注意力训练</h3>
+                <p>专注聆听和记忆音乐序列，提升你的注意力和短期记忆能力，对学习和工作都有极大帮助。</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏆</div>
+                <h3>挑战与进步</h3>
+                <p>随着级别提升，挑战越来越大。记录你的最高分，与自己竞争，看到明显的进步和提升。</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Attention Trainers. 保留所有权利。</p>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 游戏状态变量
-            const gameState = {
-                level: 1,
-                score: 0,
-                currentSequence: [],
-                playerSequence: [],
-                isPlaying: false,
-                canInput: false,
-                maxListenAgain: 2,
-                listenAgainCount: 0,
-                noteCount: 6, // 初始音符数量
-                buttonColors: [
-                    '#e74c3c', '#3498db', '#2ecc71', 
-                    '#f39c12', '#9b59b6', '#1abc9c'
-                ]
-            };
-
-            // DOM元素
-            const elements = {
-                level: document.getElementById('level'),
-                score: document.getElementById('score'),
-                message: document.getElementById('message'),
-                progressBar: document.getElementById('progressBar'),
-                buttonsContainer: document.getElementById('buttonsContainer'),
-                startButton: document.getElementById('startButton'),
-                listenAgainButton: document.getElementById('listenAgainButton')
-            };
-
-            // 音频上下文
-            let audioContext;
-            
-            // 初始化音频上下文
-            function initAudio() {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            // 创建音符按钮
-            function createButtons() {
-                elements.buttonsContainer.innerHTML = '';
-                
-                for (let i = 0; i < gameState.noteCount; i++) {
-                    const button = document.createElement('button');
-                    button.className = 'sound-button';
-                    button.style.backgroundColor = gameState.buttonColors[i % gameState.buttonColors.length];
-                    button.dataset.index = i;
-                    button.innerText = (i + 1).toString();
-                    
-                    button.addEventListener('click', () => {
-                        if (gameState.canInput) {
-                            playNote(i);
-                            checkInput(i);
-                        }
-                    });
-                    
-                    elements.buttonsContainer.appendChild(button);
-                }
-            }
-
-            // 播放单个音符
-            function playNote(index) {
-                if (!audioContext) {
-                    initAudio();
-                }
-                
-                const buttons = elements.buttonsContainer.querySelectorAll('.sound-button');
-                const button = buttons[index];
-                
-                // 视觉效果
-                button.classList.add('glow');
-                setTimeout(() => {
-                    button.classList.remove('glow');
-                }, 300);
-                
-                // 音频效果
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                // 根据按钮索引设置不同频率（音高）和音色
-                const baseFrequency = 220;
-                const frequencies = [
-                    baseFrequency,
-                    baseFrequency * 9/8,  // D
-                    baseFrequency * 5/4,  // E
-                    baseFrequency * 4/3,  // F
-                    baseFrequency * 3/2,  // G
-                    baseFrequency * 5/3   // A
-                ];
-                
-                const waveTypes = ['sine', 'square', 'triangle', 'sawtooth'];
-                oscillator.type = waveTypes[index % waveTypes.length];
-                oscillator.frequency.value = frequencies[index % frequencies.length];
-                
-                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + 0.01);
-                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.start();
-                oscillator.stop(audioContext.currentTime + 0.3);
-            }
-
-            // 播放整个序列
-            function playSequence() {
-                gameState.canInput = false;
-                elements.message.textContent = '请听...';
-                
-                // 禁用再听一次按钮，直到序列播放完毕
-                elements.listenAgainButton.disabled = true;
-                
-                let i = 0;
-                const interval = setInterval(() => {
-                    playNote(gameState.currentSequence[i]);
-                    i++;
-                    
-                    if (i >= gameState.currentSequence.length) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            elements.message.textContent = '请重现序列';
-                            gameState.canInput = true;
-                            elements.listenAgainButton.disabled = gameState.listenAgainCount >= gameState.maxListenAgain;
-                        }, 500);
-                    }
-                }, 600);
-            }
-
-            // 生成新的随机序列
-            function generateSequence() {
-                gameState.currentSequence = [];
-                
-                // 根据级别计算序列长度: 初始3个，每升2级增加1个
-                const sequenceLength = 3 + Math.floor((gameState.level - 1) / 2);
-                
-                for (let i = 0; i < sequenceLength; i++) {
-                    gameState.currentSequence.push(Math.floor(Math.random() * gameState.noteCount));
-                }
-                
-                return gameState.currentSequence;
-            }
-
-            // 检查玩家输入
-            function checkInput(index) {
-                gameState.playerSequence.push(index);
-                const currentIndex = gameState.playerSequence.length - 1;
-                
-                // 更新进度条
-                elements.progressBar.style.width = `${(gameState.playerSequence.length / gameState.currentSequence.length) * 100}%`;
-                
-                // 检查是否匹配当前位置
-                if (gameState.playerSequence[currentIndex] !== gameState.currentSequence[currentIndex]) {
-                    gameOver();
-                    return;
-                }
-                
-                // 检查是否完成整个序列
-                if (gameState.playerSequence.length === gameState.currentSequence.length) {
-                    levelComplete();
-                }
-            }
-
-            // 关卡完成
-            function levelComplete() {
-                gameState.canInput = false;
-                gameState.score += gameState.level * 10;
-                elements.score.textContent = gameState.score;
-                
-                elements.message.textContent = '太棒了！准备进入下一关...';
-                elements.progressBar.style.width = '100%';
-                
-                setTimeout(() => {
-                    gameState.level++;
-                    gameState.listenAgainCount = 0;
-                    elements.level.textContent = gameState.level;
-                    
-                    // 每4关增加一个音符按钮，最多到9个
-                    if (gameState.level % 4 === 0 && gameState.noteCount < 9) {
-                        gameState.noteCount++;
-                        createButtons();
-                    }
-                    
-                    startLevel();
-                }, 1500);
-            }
-
-            // 游戏结束
-            function gameOver() {
-                gameState.canInput = false;
-                elements.message.textContent = '游戏结束！序列不匹配';
-                elements.progressBar.style.width = '0%';
-                elements.startButton.disabled = false;
-                elements.listenAgainButton.disabled = true;
-                
-                // 闪烁错误提示
-                const redFlash = () => {
-                    document.body.style.backgroundColor = '#ffdddd';
-                    setTimeout(() => {
-                        document.body.style.backgroundColor = 'white';
-                    }, 200);
-                };
-                
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(redFlash, i * 300);
-                }
-                
-                gameState.isPlaying = false;
-                elements.startButton.textContent = '重新开始';
-            }
-
-            // 开始新关卡
-            function startLevel() {
-                gameState.playerSequence = [];
-                elements.progressBar.style.width = '0%';
-                
-                generateSequence();
-                
-                setTimeout(() => {
-                    playSequence();
-                }, 1000);
-            }
-
-            // 开始游戏
-            function startGame() {
-                if (!audioContext) {
-                    initAudio();
-                }
-                
-                gameState.level = 1;
-                gameState.score = 0;
-                gameState.isPlaying = true;
-                gameState.listenAgainCount = 0;
-                gameState.noteCount = 6; // 重置音符数量
-                
-                elements.level.textContent = gameState.level;
-                elements.score.textContent = gameState.score;
-                elements.startButton.disabled = true;
-                elements.message.textContent = '准备开始...';
-                
-                createButtons();
-                startLevel();
-            }
-
-            // 再听一次
-            function listenAgain() {
-                if (gameState.listenAgainCount < gameState.maxListenAgain) {
-                    gameState.listenAgainCount++;
-                    playSequence();
-                    
-                    if (gameState.listenAgainCount >= gameState.maxListenAgain) {
-                        elements.listenAgainButton.disabled = true;
-                    }
-                }
-            }
-
-            // 事件监听器
-            elements.startButton.addEventListener('click', startGame);
-            elements.listenAgainButton.addEventListener('click', listenAgain);
-
-            // 初始化按钮
-            createButtons();
+        // 全屏功能实现
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const gameIframe = document.getElementById('game-iframe');
+        
+        fullscreenButton.addEventListener('click', () => {
+            toggleFullScreen();
         });
+        
+        function toggleFullScreen() {
+            // 检查是否支持全屏API
+            if (!document.fullscreenEnabled && 
+                !document.webkitFullscreenEnabled && 
+                !document.mozFullScreenEnabled &&
+                !document.msFullscreenEnabled) {
+                alert('您的浏览器不支持全屏模式');
+                return;
+            }
+            
+            // 尝试将iframe设为全屏
+            try {
+                if (!document.fullscreenElement && 
+                    !document.webkitFullscreenElement && 
+                    !document.mozFullScreenElement && 
+                    !document.msFullscreenElement) {
+                    
+                    // 根据浏览器支持选择合适的全屏方法
+                    if (gameIframe.requestFullscreen) {
+                        gameIframe.requestFullscreen();
+                    } else if (gameIframe.webkitRequestFullscreen) { /* Safari */
+                        gameIframe.webkitRequestFullscreen();
+                    } else if (gameIframe.mozRequestFullScreen) { /* Firefox */
+                        gameIframe.mozRequestFullScreen();
+                    } else if (gameIframe.msRequestFullscreen) { /* IE11 */
+                        gameIframe.msRequestFullscreen();
+                    }
+                } else {
+                    // 退出全屏
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) { /* Firefox */
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+            } catch (error) {
+                console.error('全屏切换出错:', error);
+                
+                // 尝试备用方案：直接打开game.html
+                window.open('game.html', '_blank');
+            }
+        }
+        
+        // 监听全屏变化，更新按钮文本
+        document.addEventListener('fullscreenchange', updateFullscreenButtonText);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButtonText);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButtonText);
+        document.addEventListener('MSFullscreenChange', updateFullscreenButtonText);
+        
+        function updateFullscreenButtonText() {
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
+                fullscreenButton.innerHTML = `
+                    <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                        <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                    </svg>
+                    退出全屏
+                `;
+            } else {
+                fullscreenButton.innerHTML = `
+                    <svg class="fullscreen-icon" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                    全屏
+                `;
+            }
+        }
+        
+        // 修复iOS等移动设备上iframe全屏的问题
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            fullscreenButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                // 在移动设备上，直接打开game.html可能效果更好
+                window.open('game.html', '_blank');
+            });
+        }
     </script>
 </body>
 </html>
