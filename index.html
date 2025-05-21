@@ -1,311 +1,620 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attention Trainers - 音乐模仿游戏</title>
+    <title>Attention Trainers - 专注力训练游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
         }
         
         body {
+            font-family: 'Arial', sans-serif;
             background-color: #f5f5f5;
             color: #333;
-            font-family: 'Arial', sans-serif;
             line-height: 1.6;
         }
         
-        header {
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        header p {
-            font-size: 1rem;
-            opacity: 0.8;
-        }
-        
-        main {
+        .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
-        .game-intro {
+        header {
+            background-color: #4a154b;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .logo-accent {
+            color: #9c27b0;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: #9c27b0;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #6a1b9a, #4a154b);
+            color: white;
+            padding: 60px 0;
             text-align: center;
-            margin-bottom: 2rem;
         }
         
-        .game-intro h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: #4CAF50;
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
         }
         
-        .game-intro p {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto 1.5rem;
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #9c27b0;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .game-section {
+            padding: 60px 0;
+            background-color: #fff;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .section-header h2 {
+            font-size: 36px;
+            color: #4a154b;
+            margin-bottom: 15px;
+        }
+        
+        .section-header p {
+            font-size: 18px;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
         }
         
         .game-container {
             position: relative;
             width: 100%;
-            height: 0;
-            padding-bottom: 62.5%; /* 16:10宽高比 */
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 600px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
         
         .game-iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             border: none;
         }
         
-        .fullscreen-button {
+        .fullscreen-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(76, 175, 80, 0.8);
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
             color: white;
             border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .fullscreen-button:hover {
-            background-color: rgba(76, 175, 80, 1);
-        }
-        
-        .fullscreen-icon {
-            width: 16px;
-            height: 16px;
-            fill: white;
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .feature {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        
-        .feature-icon {
-            background-color: #e8f5e9;
-            color: #4CAF50;
-            width: 60px;
-            height: 60px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 100;
         }
         
-        .feature h3 {
-            margin-bottom: 1rem;
-            color: #333;
+        .fullscreen-btn:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .features {
+            padding: 60px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            background-color: #f0e5f4;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .feature-icon i {
+            color: #4a154b;
+            font-size: 30px;
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #4a154b;
+        }
+        
+        .feature-card p {
+            color: #666;
+        }
+        
+        .testimonials {
+            padding: 60px 0;
+            background-color: #fff;
+        }
+        
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .testimonial-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .testimonial-card:before {
+            content: '\201C';
+            font-size: 80px;
+            font-family: Georgia, serif;
+            color: rgba(74, 21, 75, 0.1);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .testimonial-text {
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        
+        .author-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .author-info h4 {
+            margin: 0;
+            color: #4a154b;
+        }
+        
+        .author-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
         }
         
         footer {
-            background-color: #333;
+            background-color: #4a154b;
             color: white;
-            text-align: center;
-            padding: 1.5rem 0;
-            margin-top: 2rem;
+            padding: 40px 0 20px;
         }
         
-        footer p {
-            opacity: 0.8;
-            font-size: 0.9rem;
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-col h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-col h3:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #9c27b0;
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-col ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-col ul li a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: #9c27b0;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #ccc;
         }
         
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.5rem;
+            .header-content {
+                flex-direction: column;
             }
             
-            .game-intro h2 {
-                font-size: 1.5rem;
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            nav ul li {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
             }
             
             .game-container {
-                padding-bottom: 75%; /* 调整移动设备宽高比 */
+                height: 450px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .game-container {
+                height: 350px;
+            }
+            
+            .section-header h2 {
+                font-size: 28px;
+            }
+            
+            .feature-card, .testimonial-card {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Attention Trainers</h1>
-        <p>提升您的注意力和音乐能力</p>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Attention<span class="logo-accent">Trainers</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="#game">游戏</a></li>
+                        <li><a href="#features">特点</a></li>
+                        <li><a href="#testimonials">评价</a></li>
+                        <li><a href="#contact">联系我们</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </header>
     
-    <main>
-        <section class="game-intro">
-            <h2>音乐模仿游戏</h2>
-            <p>挑战你的听力和注意力！聆听音乐节奏，然后精确地模仿出来。测试你的音乐记忆力和节奏感，看看你能获得多高的分数！</p>
-        </section>
-        
-        <div class="game-container">
-            <iframe id="game-iframe" class="game-iframe" src="game.html" title="音乐模仿游戏" allowfullscreen></iframe>
-            <button id="fullscreen-button" class="fullscreen-button">
-                <svg class="fullscreen-icon" viewBox="0 0 24 24">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                </svg>
-                全屏
-            </button>
+    <section class="hero">
+        <div class="container">
+            <h1>提升您的注意力与专注力</h1>
+            <p>通过有趣的声光同步挑战游戏，训练您的反应能力、节奏感和专注力</p>
+            <a href="#game" class="btn">立即体验</a>
         </div>
-        
-        <section class="features">
-            <div class="feature">
-                <div class="feature-icon">🎵</div>
-                <h3>音乐节奏训练</h3>
-                <p>通过模仿各种复杂的音乐节奏，提高你的听力和节奏感。游戏会根据你的水平逐步增加难度。</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🧠</div>
-                <h3>注意力训练</h3>
-                <p>专注聆听和记忆音乐序列，提升你的注意力和短期记忆能力，对学习和工作都有极大帮助。</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🏆</div>
-                <h3>挑战与进步</h3>
-                <p>随着级别提升，挑战越来越大。记录你的最高分，与自己竞争，看到明显的进步和提升。</p>
-            </div>
-        </section>
-    </main>
+    </section>
     
-    <footer>
-        <p>&copy; 2025 Attention Trainers. 保留所有权利。</p>
+    <section id="game" class="game-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>声光同步挑战游戏</h2>
+                <p>按照节奏点击按钮，挑战您的反应能力和专注力。随着等级提升，游戏难度会逐渐增加！</p>
+            </div>
+            <div class="game-container">
+                <iframe id="gameFrame" src="game.html" class="game-iframe" allowfullscreen></iframe>
+                <button id="fullscreenBtn" class="fullscreen-btn" title="全屏模式">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>游戏特点</h2>
+                <p>我们的声光同步挑战游戏专为提高您的专注力和反应能力而设计</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3>提升专注力</h3>
+                    <p>通过持续关注视觉和听觉刺激，增强大脑的专注能力，帮助您在日常工作和学习中保持注意力集中。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3>锻炼反应速度</h3>
+                    <p>随着游戏难度的增加，您的反应速度将得到有效锻炼，提高在快节奏环境中的应对能力。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-music"></i>
+                    </div>
+                    <h3>增强节奏感</h3>
+                    <p>通过跟随听觉和视觉节奏，培养您的时间感知能力和节奏协调性，对音乐学习和体育活动都有帮助。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>用户评价</h2>
+                <p>听听其他用户对我们声光同步挑战游戏的评价</p>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">这个游戏太棒了！我每天都会玩几轮来提高我的专注力。几周后，我明显感觉到自己的反应速度变快了。</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="/api/placeholder/80/80" alt="用户头像">
+                        </div>
+                        <div class="author-info">
+                            <h4>李明</h4>
+                            <p>学生，上海</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">作为一名音乐老师，我推荐我的学生们使用这个游戏来提高他们的节奏感。效果非常显著！</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="/api/placeholder/80/80" alt="用户头像">
+                        </div>
+                        <div class="author-info">
+                            <h4>王芳</h4>
+                            <p>音乐教师，北京</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">这个游戏简单但上瘾，我的孩子们很喜欢玩，而且对提高他们的专注力确实有帮助。强烈推荐！</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="/api/placeholder/80/80" alt="用户头像">
+                        </div>
+                        <div class="author-info">
+                            <h4>张伟</h4>
+                            <p>家长，深圳</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>关于我们</h3>
+                    <p>Attention Trainers 致力于通过有趣的游戏方式提升人们的专注力和认知能力，让学习和成长变得更加有趣。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-bilibili"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="#game">游戏</a></li>
+                        <li><a href="#features">特点</a></li>
+                        <li><a href="#testimonials">评价</a></li>
+                        <li><a href="#">隐私政策</a></li>
+                        <li><a href="#">使用条款</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>联系我们</h3>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> contact@attentiontrainers.com</li>
+                        <li><i class="fas fa-phone"></i> 400-123-4567</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 上海市浦东新区科技园区</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 AttentionTrainers.com 版权所有
+            </div>
+        </div>
     </footer>
 
     <script>
-        // 全屏功能实现
-        const fullscreenButton = document.getElementById('fullscreen-button');
-        const gameIframe = document.getElementById('game-iframe');
-        
-        fullscreenButton.addEventListener('click', () => {
-            toggleFullScreen();
-        });
-        
-        function toggleFullScreen() {
-            // 检查是否支持全屏API
-            if (!document.fullscreenEnabled && 
-                !document.webkitFullscreenEnabled && 
-                !document.mozFullScreenEnabled &&
-                !document.msFullscreenEnabled) {
-                alert('您的浏览器不支持全屏模式');
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const gameFrame = document.getElementById('gameFrame');
+            
+            fullscreenBtn.addEventListener('click', function() {
+                if (gameFrame.requestFullscreen) {
+                    gameFrame.requestFullscreen();
+                } else if (gameFrame.mozRequestFullScreen) { /* Firefox */
+                    gameFrame.mozRequestFullScreen();
+                } else if (gameFrame.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+                    gameFrame.webkitRequestFullscreen();
+                } else if (gameFrame.msRequestFullscreen) { /* IE/Edge */
+                    gameFrame.msRequestFullscreen();
+                }
+            });
+            
+            // 监听全屏变化
+            document.addEventListener('fullscreenchange', updateFullscreenBtn);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenBtn);
+            document.addEventListener('mozfullscreenchange', updateFullscreenBtn);
+            document.addEventListener('MSFullscreenChange', updateFullscreenBtn);
+            
+            function updateFullscreenBtn() {
+                if (document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement || 
+                    document.msFullscreenElement) {
+                    // 全屏模式
+                    fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+                } else {
+                    // 非全屏模式
+                    fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+                }
             }
             
-            // 尝试将iframe设为全屏
-            try {
-                if (!document.fullscreenElement && 
-                    !document.webkitFullscreenElement && 
-                    !document.mozFullScreenElement && 
-                    !document.msFullscreenElement) {
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
                     
-                    // 根据浏览器支持选择合适的全屏方法
-                    if (gameIframe.requestFullscreen) {
-                        gameIframe.requestFullscreen();
-                    } else if (gameIframe.webkitRequestFullscreen) { /* Safari */
-                        gameIframe.webkitRequestFullscreen();
-                    } else if (gameIframe.mozRequestFullScreen) { /* Firefox */
-                        gameIframe.mozRequestFullScreen();
-                    } else if (gameIframe.msRequestFullscreen) { /* IE11 */
-                        gameIframe.msRequestFullscreen();
-                    }
-                } else {
-                    // 退出全屏
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) { /* Safari */
-                        document.webkitExitFullscreen();
-                    } else if (document.mozCancelFullScreen) { /* Firefox */
-                        document.mozCancelFullScreen();
-                    } else if (document.msExitFullscreen) { /* IE11 */
-                        document.msExitFullscreen();
-                    }
-                }
-            } catch (error) {
-                console.error('全屏切换出错:', error);
-                
-                // 尝试备用方案：直接打开game.html
-                window.open('game.html', '_blank');
-            }
-        }
-        
-        // 监听全屏变化，更新按钮文本
-        document.addEventListener('fullscreenchange', updateFullscreenButtonText);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenButtonText);
-        document.addEventListener('mozfullscreenchange', updateFullscreenButtonText);
-        document.addEventListener('MSFullscreenChange', updateFullscreenButtonText);
-        
-        function updateFullscreenButtonText() {
-            if (document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement || 
-                document.msFullscreenElement) {
-                fullscreenButton.innerHTML = `
-                    <svg class="fullscreen-icon" viewBox="0 0 24 24">
-                        <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
-                    </svg>
-                    退出全屏
-                `;
-            } else {
-                fullscreenButton.innerHTML = `
-                    <svg class="fullscreen-icon" viewBox="0 0 24 24">
-                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                    </svg>
-                    全屏
-                `;
-            }
-        }
-        
-        // 修复iOS等移动设备上iframe全屏的问题
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            fullscreenButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                // 在移动设备上，直接打开game.html可能效果更好
-                window.open('game.html', '_blank');
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>
